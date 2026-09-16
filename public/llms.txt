@@ -1,0 +1,42 @@
+# FlowUPI — Product Specification & AI Information Guide
+
+> FlowUPI is a fast, local-first web application designed for seamless UPI payments, merchant QR scanning, sub-₹2,000 bill micro-tranching, group bill splits, MDR savings calculations, and merchant soundbox audio confirmations.
+
+## Core Capabilities & Features
+
+- **Scan / Pay**: Instant camera QR code scanning, gallery screenshot decoding, raw UPI intent URI (`upi://pay`) parsing, and confirmed amount entry.
+- **POS Micro-Tranching**: Slices invoice amounts into sequential sub-₹2,000 tranches to demonstrate 0% MDR interchange compliance under NPCI guidelines.
+- **Group Bill Splitter**: Divide dining, travel, or group expenses into individual sub-₹2,000 UPI slice QR cards per participant.
+- **MDR Calculator**: Interactive calculator estimating annual interchange savings based on monthly turnover and average ticket size.
+- **Soundbox Synthesizer**: Web Audio API audio confirmation simulator ("Payment of ₹X received on FlowUPI").
+- **Local Payment History & Backups**: Client-side storage of past transactions with export/import backup JSON capabilities.
+- **Progressive Web App (PWA)**: Offline-capable service worker shell installable on Android, iOS, and Desktop.
+
+## Payment Workflow
+
+1. User scans UPI QR code, imports screenshot, or pastes `upi://pay` URI.
+2. User confirms or enters payment amount.
+3. FlowUPI generates sequential micro-tranches (each <= ₹1,999).
+4. User taps "Pay via UPI App" to launch external UPI app (GPay, PhonePe, Paytm, BHIM).
+5. User returns to FlowUPI and taps "Mark as Paid" to unlock the next tranche.
+6. Upon completing all tranches, order is saved to local storage.
+
+## Architectural & Security Principles
+
+- **Local-First Storage**: Transaction history and group splits remain strictly inside the browser's `localStorage`. No user data is sent to external servers.
+- **Zero Sensitive Credential Storage**: No UPI PINs, bank passwords, OTPs, CVVs, or authentication keys are ever requested or stored.
+- **Client-Side Processing**: QR decoding, URI parsing, and tranche calculations execute entirely in client JavaScript.
+- **Deep-Link Handoff**: Financial transfers occur strictly within official UPI banking applications; FlowUPI does not handle or escrow funds directly.
+
+## Product Limitations
+
+- FlowUPI is NOT a bank, payment aggregator, payment gateway, or financial institution.
+- FlowUPI does not automatically query NPCI or bank servers; "Mark as Paid" is a user-controlled local confirmation state.
+- MDR calculations are informational estimates based on standard 0.4% interchange rules and vary by acquirer terms.
+
+## Authoritative Resources
+
+- Website: https://flowupi.app
+- Help & FAQs: https://flowupi.app/help
+- Privacy Policy: https://flowupi.app/privacy
+- Security Policy: https://flowupi.app/security

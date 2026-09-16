@@ -7,6 +7,14 @@ import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
 export const metadata: Metadata = {
   title: 'FlowUPI — Security & Data Architecture',
   description: 'Technical overview of FlowUPI local-first security model, non-storage of sensitive bank credentials, QR code untrusted input sanitization, and vulnerability reporting.',
+  alternates: {
+    canonical: '/security',
+  },
+  openGraph: {
+    title: 'FlowUPI — Security & Data Architecture',
+    description: 'Technical overview of FlowUPI local-first security model, non-storage of sensitive bank credentials, QR code untrusted input sanitization, and vulnerability reporting.',
+    url: '/security',
+  },
 };
 
 export default function SecurityPage() {

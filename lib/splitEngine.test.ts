@@ -1,3 +1,23 @@
+// Mock browser globals for Node test runner
+if (typeof globalThis.window === 'undefined') {
+  const mockStorage = { setItem: () => {}, getItem: () => null, removeItem: () => {} };
+  const mockWin = {
+    dispatchEvent: () => {},
+    localStorage: mockStorage,
+  };
+  (global as unknown as { window: unknown; localStorage: unknown }).window = mockWin;
+  (global as unknown as { window: unknown; localStorage: unknown }).localStorage = mockStorage;
+  (globalThis as unknown as { window: unknown; localStorage: unknown }).window = mockWin;
+  (globalThis as unknown as { window: unknown; localStorage: unknown }).localStorage = mockStorage;
+}
+if (typeof globalThis.CustomEvent === 'undefined') {
+  const mockCE = class CustomEvent {
+    constructor(public type: string) {}
+  };
+  (global as unknown as { CustomEvent: unknown }).CustomEvent = mockCE;
+  (globalThis as unknown as { CustomEvent: unknown }).CustomEvent = mockCE;
+}
+
 import {
   calculateTrancheAmounts,
   buildUpiUri,

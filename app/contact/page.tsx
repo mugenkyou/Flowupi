@@ -7,6 +7,14 @@ import { Mail, Github, MessageSquare, AlertCircle, ExternalLink, HelpCircle } fr
 export const metadata: Metadata = {
   title: 'FlowUPI — Contact Maintainers',
   description: 'Connect with FlowUPI project maintainers, report bugs, request features, or review official repository support channels.',
+  alternates: {
+    canonical: '/contact',
+  },
+  openGraph: {
+    title: 'FlowUPI — Contact Maintainers',
+    description: 'Connect with FlowUPI project maintainers, report bugs, request features, or review official repository support channels.',
+    url: '/contact',
+  },
 };
 
 export default function ContactPage() {

@@ -5,6 +5,14 @@ import { ShieldAlert, Calculator, Info, CheckCircle2 } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'FlowUPI — Financial & Utility Disclaimer',
   description: 'FlowUPI Disclaimer explaining software utility scope, educational zero-MDR simulation context, and non-binding calculator estimates.',
+  alternates: {
+    canonical: '/disclaimer',
+  },
+  openGraph: {
+    title: 'FlowUPI — Financial & Utility Disclaimer',
+    description: 'FlowUPI Disclaimer explaining software utility scope, educational zero-MDR simulation context, and non-binding calculator estimates.',
+    url: '/disclaimer',
+  },
 };
 
 export default function DisclaimerPage() {

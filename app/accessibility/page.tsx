@@ -5,6 +5,14 @@ import { Eye, Keyboard, Layout, MonitorCheck } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'FlowUPI — Accessibility Statement',
   description: 'FlowUPI Accessibility Statement describing semantic HTML controls, keyboard navigation, high contrast NeoPOP tokens, and screen reader usability.',
+  alternates: {
+    canonical: '/accessibility',
+  },
+  openGraph: {
+    title: 'FlowUPI — Accessibility Statement',
+    description: 'FlowUPI Accessibility Statement describing semantic HTML controls, keyboard navigation, high contrast NeoPOP tokens, and screen reader usability.',
+    url: '/accessibility',
+  },
 };
 
 export default function AccessibilityPage() {

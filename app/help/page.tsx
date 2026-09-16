@@ -3,10 +3,28 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
 import { HelpCircle, QrCode, Lock, Zap, Smartphone, ArrowRight, ShieldCheck } from 'lucide-react';
+import { getFaqSchema } from '../../lib/jsonld';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.app';
 
 export const metadata: Metadata = {
   title: 'FlowUPI — Help & Frequently Asked Questions',
   description: 'Find answers to common questions regarding FlowUPI QR scanning, sub-₹2,000 micro-tranching, UPI launching, local browser storage, and PWA installation.',
+  alternates: {
+    canonical: `${SITE_URL}/help`,
+  },
+  openGraph: {
+    title: 'FlowUPI — Help & Frequently Asked Questions',
+    description: 'Find answers to common questions regarding FlowUPI QR scanning, sub-₹2,000 micro-tranching, UPI launching, local browser storage, and PWA installation.',
+    url: `${SITE_URL}/help`,
+    siteName: 'FlowUPI',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'FlowUPI — Help & Frequently Asked Questions',
+    description: 'Find answers to common questions regarding FlowUPI QR scanning, sub-₹2,000 micro-tranching, UPI launching, local browser storage, and PWA installation.',
+  },
 };
 
 export default function HelpPage() {
@@ -95,8 +113,18 @@ export default function HelpPage() {
     },
   ];
 
+  const allFaqs = faqCategories.flatMap((cat) =>
+    cat.questions.map((q) => ({ question: q.q, answer: q.a }))
+  );
+  const faqSchema = getFaqSchema(allFaqs);
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       {/* Page Header */}
       <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 sm:p-8 shadow-neo space-y-3">
         <div className="flex items-center gap-2 text-brand-cyan font-black">

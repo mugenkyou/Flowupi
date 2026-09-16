@@ -5,6 +5,14 @@ import { FileText, ShieldAlert, CheckCircle2, ExternalLink } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'FlowUPI — Terms of Use',
   description: 'FlowUPI Terms of Use detailing software utility scope, user responsibilities, local data handling, and distinction between link generation and bank payment execution.',
+  alternates: {
+    canonical: '/terms',
+  },
+  openGraph: {
+    title: 'FlowUPI — Terms of Use',
+    description: 'FlowUPI Terms of Use detailing software utility scope, user responsibilities, local data handling, and distinction between link generation and bank payment execution.',
+    url: '/terms',
+  },
 };
 
 export default function TermsPage() {

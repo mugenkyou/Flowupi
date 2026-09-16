@@ -5,9 +5,26 @@ import { FlowUpiLogo } from '../../components/FlowUpiLogo';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
 import { QrCode, Store, Users, Calculator, Volume2, ShieldCheck, Zap, ArrowRight, Lock } from 'lucide-react';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.app';
+
 export const metadata: Metadata = {
-  title: 'FlowUPI — About FlowUPI',
-  description: 'Learn about FlowUPI, a fast, local-first UPI payment utility built for seamless QR scanning, micro-tranching, MDR calculations, and client-side privacy.',
+  title: 'FlowUPI — About FlowUPI & Local-First UPI Utilities',
+  description: 'Learn about FlowUPI, a fast, local-first UPI payment utility built for QR scanning, micro-tranching, MDR calculations, and client-side privacy.',
+  alternates: {
+    canonical: `${SITE_URL}/about`,
+  },
+  openGraph: {
+    title: 'FlowUPI — About FlowUPI & Local-First UPI Utilities',
+    description: 'Learn about FlowUPI, a fast, local-first UPI payment utility built for QR scanning, micro-tranching, MDR calculations, and client-side privacy.',
+    url: `${SITE_URL}/about`,
+    siteName: 'FlowUPI',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'FlowUPI — About FlowUPI & Local-First UPI Utilities',
+    description: 'Learn about FlowUPI, a fast, local-first UPI payment utility built for QR scanning, micro-tranching, MDR calculations, and client-side privacy.',
+  },
 };
 
 export default function AboutPage() {

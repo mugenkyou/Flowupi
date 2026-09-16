@@ -5,6 +5,14 @@ import { ShieldCheck, HardDrive, Camera, ExternalLink, Lock } from 'lucide-react
 export const metadata: Metadata = {
   title: 'FlowUPI — Privacy Policy',
   description: 'FlowUPI Privacy Policy detailing local-first browser storage, client-side camera QR scanning, UPI deep links, and zero remote server credential storage.',
+  alternates: {
+    canonical: '/privacy',
+  },
+  openGraph: {
+    title: 'FlowUPI — Privacy Policy',
+    description: 'FlowUPI Privacy Policy detailing local-first browser storage, client-side camera QR scanning, UPI deep links, and zero remote server credential storage.',
+    url: '/privacy',
+  },
 };
 
 export default function PrivacyPage() {
