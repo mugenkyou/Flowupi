@@ -1,11 +1,11 @@
 {
-    "name": "SplitUPI",
-    "short_name": "SplitUPI",
+    "name": "FlowUPI",
+    "short_name": "FlowUPI",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#070B14",
-    "theme_color": "#070B14",
-    "description": "Educational Research & Algorithmic Simulation of UPI Micro-Tranching for 0% MDR Compliance",
+    "background_color": "#05080E",
+    "theme_color": "#05080E",
+    "description": "FlowUPI — Fast local-first UPI payment utility.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

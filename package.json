@@ -1,6 +1,7 @@
 {
-  "name": "splitupi-web",
+  "name": "flowupi-web",
   "version": "1.0.0",
+  "description": "FlowUPI — Fast Local-First UPI Payment Utility",
   "private": true,
   "scripts": {
     "dev": "next dev",

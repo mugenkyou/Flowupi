@@ -1,7 +1,7 @@
 {
-  "name": "SplitUPI — 0% MDR Payment Engine",
-  "short_name": "SplitUPI",
-  "description": "Split UPI payments into sub-₹2,000 micro-tranches for 0% MDR surcharge-free checkout.",
+  "name": "FlowUPI — Fast Local-First UPI Payment Utility",
+  "short_name": "FlowUPI",
+  "description": "FlowUPI is a fast, local-first UPI payment utility for QR payments, payment splitting, group bills, MDR calculations and more.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

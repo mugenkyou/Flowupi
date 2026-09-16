@@ -19,12 +19,12 @@ export default function SoundboxPage() {
           Soundbox Audio Synthesizer
         </h1>
         <p className="text-xs font-bold text-txt-secondary mt-1">
-          Simulate counter hardware audio confirmations (*"Payment of ₹X received on SplitUPI"*) using Web Audio API and Speech Synthesis.
+          Simulate counter hardware audio confirmations (*"Payment of ₹X received on FlowUPI"*) using Web Audio API and Speech Synthesis.
         </p>
       </div>
 
       {/* Main Soundbox Component */}
-      <SoundboxSpeaker defaultAmount={1999} merchantName="SplitUPI Store" />
+      <SoundboxSpeaker defaultAmount={1999} merchantName="FlowUPI Store" />
 
       {/* Quick Amount Presets Card */}
       <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-4">
@@ -40,7 +40,7 @@ export default function SoundboxPage() {
             <button
               key={amt}
               onClick={() => {
-                playSoundboxConfirmation(amt, 'SplitUPI Store');
+                playSoundboxConfirmation(amt, 'FlowUPI Store');
               }}
               className="flex flex-col items-center justify-center p-3 border-[1.5px] border-border-subtle bg-bg-elevated hover:border-brand-primary hover:bg-brand-primary/10 transition-all shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px]"
             >

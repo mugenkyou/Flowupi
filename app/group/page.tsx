@@ -71,7 +71,7 @@ export default function GroupSplitPage() {
   };
 
   const perPersonShare = (totalAmount / numberOfPeople).toFixed(2);
-  const groupShareText = `🍽️ Group Bill Split via @SplitUPI!\nTotal: ₹${totalAmount.toFixed(0)} (${numberOfPeople} people • ₹${perPersonShare}/person)\nPay your share instantly with 0% MDR fee! 🚀\n#SplitUPI #GroupSplit`;
+  const groupShareText = `🍽️ Group Bill Split via @FlowUPI!\nTotal: ₹${totalAmount.toFixed(0)} (${numberOfPeople} people • ₹${perPersonShare}/person)\nPay your share instantly with 0% MDR fee! 🚀\n#FlowUPI #GroupSplit`;
 
   const handleCopyGroupShare = () => {
     navigator.clipboard.writeText(groupShareText);

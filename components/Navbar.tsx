@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { SplitUpiLogo } from './SplitUpiLogo';
+import { FlowUpiLogo } from './FlowUpiLogo';
 import {
   QrCode,
   Store,
@@ -72,6 +72,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
       onOrderCreated(order);
     }
     if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('flowupi:order_created', { detail: order }));
       window.dispatchEvent(new CustomEvent('splitupi:order_created', { detail: order }));
     }
     if (pathname !== '/') {
@@ -82,7 +83,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
   const handleInstallClick = async () => {
     const success = await triggerInstall();
     if (!success && !isInstallable) {
-      alert("To install SplitUPI on your device, open your browser menu (⋮ or Share) and select 'Add to Home Screen' or 'Install App'.");
+      alert("To install FlowUPI on your device, open your browser menu (⋮ or Share) and select 'Add to Home Screen' or 'Install App'.");
     }
   };
 
@@ -93,7 +94,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <SplitUpiLogo size="md" />
+            <FlowUpiLogo size="md" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -132,7 +133,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             {!isStandalone && (
               <button
                 onClick={handleInstallClick}
-                title="Install SplitUPI Web App"
+                title="Install FlowUPI Web App"
                 className="hidden md:flex items-center gap-1.5 border border-border-subtle bg-bg-elevated px-2.5 py-1.5 text-xs font-black text-txt-secondary hover:text-brand-primary hover:border-brand-primary transition-all"
               >
                 <Smartphone className="h-4 w-4 text-brand-primary" />
@@ -173,7 +174,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
           <div className="relative z-10 flex h-full w-72 max-w-[85vw] flex-col border-l-[1.5px] border-border-subtle bg-bg-surface shadow-2xl transition-transform">
             {/* Drawer Header */}
             <div className="flex items-center justify-between border-b border-border-subtle p-4 bg-bg-elevated">
-              <SplitUpiLogo size="sm" />
+              <FlowUpiLogo size="sm" />
               <button
                 onClick={() => setIsDrawerOpen(false)}
                 className="flex h-8 w-8 items-center justify-center border border-border-subtle text-txt-secondary hover:border-brand-primary hover:text-txt-primary"
@@ -227,7 +228,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
               >
                 <div className="flex items-center gap-3">
                   <Smartphone className="h-4 w-4 text-brand-primary" />
-                  <span>INSTALL WEB APP</span>
+                  <span>INSTALL FLOWUPI</span>
                 </div>
                 <Download className="h-4 w-4 text-brand-primary" />
               </button>
@@ -236,7 +237,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             {/* Drawer Footer */}
             <div className="border-t border-border-subtle p-4 bg-bg-elevated/50 text-center">
               <span className="text-[10px] font-black uppercase tracking-widest text-txt-muted">
-                SplitUPI • 0% MDR Payment Engine
+                FlowUPI • 0% MDR Payment Engine
               </span>
             </div>
           </div>
@@ -251,6 +252,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
           onScannedPayload={(payload) => {
             setIsScannerOpen(false);
             if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('flowupi:qr_scanned', { detail: payload }));
               window.dispatchEvent(new CustomEvent('splitupi:qr_scanned', { detail: payload }));
             }
             if (pathname !== '/') {
@@ -283,7 +285,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             <div className="text-xs text-txt-secondary space-y-2 leading-relaxed">
               <p>• NPCI guidelines mandate interchange fees on merchant transactions exceeding ₹2,000.</p>
               <p>• Transactions of ₹2,000 or under remain 0% MDR compliant.</p>
-              <p>• SplitUPI demonstrates algorithmic bill tranching to simulate surcharge-free transactions.</p>
+              <p>• FlowUPI demonstrates algorithmic bill tranching to simulate surcharge-free transactions.</p>
             </div>
 
             <div className="border border-status-warning/40 bg-status-warning/10 p-3 text-[11px] font-bold text-status-warning flex items-start gap-2">

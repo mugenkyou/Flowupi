@@ -4,13 +4,13 @@ import { Navbar } from '../components/Navbar';
 import { OfflineBanner } from '../components/OfflineBanner';
 
 export const metadata: Metadata = {
-  title: 'SplitUPI — 0% MDR Payment Micro-Tranching Web App',
-  description: 'Educational Research & Algorithmic Simulation of UPI Micro-Tranching for 0% MDR Compliance',
+  title: 'FlowUPI — Fast Local-First UPI Payment Utility',
+  description: 'FlowUPI is a fast, local-first UPI payment utility for QR payments, payment splitting, group bills, MDR calculations and more.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SplitUPI',
+    title: 'FlowUPI',
   },
   icons: {
     icon: '/icons/icon.svg',
@@ -46,7 +46,7 @@ export default function RootLayout({
         <OfflineBanner />
         <footer className="border-t border-border-subtle bg-bg-surface/50 py-6 text-center text-xs text-txt-muted">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <span>© 2026 SplitUPI Research · Local-First Web Application</span>
+            <span>© 2026 FlowUPI Research · Local-First Web Application</span>
             <span className="text-[11px] text-txt-muted">
               Built for academic demonstration & algorithmic simulation of 0% MDR compliance under NPCI guidelines.
             </span>

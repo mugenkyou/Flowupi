@@ -44,8 +44,12 @@ export default function HomePage() {
       }
     };
 
+    window.addEventListener('flowupi:qr_scanned', handleQrScannedEvent);
     window.addEventListener('splitupi:qr_scanned', handleQrScannedEvent);
-    return () => window.removeEventListener('splitupi:qr_scanned', handleQrScannedEvent);
+    return () => {
+      window.removeEventListener('flowupi:qr_scanned', handleQrScannedEvent);
+      window.removeEventListener('splitupi:qr_scanned', handleQrScannedEvent);
+    };
   }, []);
 
   const processDecodedResult = (rawData: string) => {
@@ -64,7 +68,7 @@ export default function HomePage() {
     const payload: ScannedPayload = {
       pa: parsed.pa,
       pn: parsed.pn || 'Merchant',
-      note: parsed.tn || 'Scan & Pay Checkout',
+      note: parsed.tn || 'FlowUPI Checkout',
       qrAmount: qrAmt,
     };
 
@@ -131,7 +135,7 @@ export default function HomePage() {
           Scan & Pay Merchant UPI QR
         </h1>
         <p className="text-xs font-bold text-txt-secondary mt-1 max-w-xl">
-          Scan counter QR codes or import payment screenshots to initiate sub-₹2,000 micro-tranche surcharge-free checkout.
+          FlowUPI • Fast, local-first UPI payment utility. Scan counter QR codes or import payment screenshots to initiate sub-₹2,000 micro-tranche surcharge-free checkout.
         </p>
       </div>
 

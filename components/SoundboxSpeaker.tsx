@@ -13,7 +13,7 @@ interface SoundboxSpeakerProps {
 
 export function SoundboxSpeaker({
   defaultAmount = 1999,
-  merchantName = 'SplitUPI Store',
+  merchantName = 'FlowUPI Store',
   className = '',
 }: SoundboxSpeakerProps) {
   const [amount, setAmount] = useState<number>(defaultAmount);

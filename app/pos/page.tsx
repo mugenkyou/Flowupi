@@ -238,7 +238,7 @@ export default function PosPage() {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-bold text-txt-muted uppercase">SplitUPI MDR Fee</span>
+                  <span className="text-[10px] font-bold text-txt-muted uppercase">FlowUPI MDR Fee</span>
                   <div className="text-base font-black text-status-success">
                     ₹0.00 (0%)
                   </div>

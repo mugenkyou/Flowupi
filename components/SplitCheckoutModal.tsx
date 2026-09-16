@@ -136,7 +136,7 @@ export function SplitCheckoutModal({
             </span>
             <div>
               <h2 className="text-sm font-black uppercase tracking-wider text-txt-primary">
-                SplitUPI Payment Checkout
+                FlowUPI Payment Checkout
               </h2>
               <p className="text-[11px] font-bold text-txt-muted">
                 Order #{order.orderId} • {order.merchantName} ({order.merchantVpa})

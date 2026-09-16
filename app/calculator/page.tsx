@@ -21,7 +21,7 @@ export default function SavingsCalculatorPage() {
   const mdrRate = avgTicketSize > 2000 ? 0.004 : 0.0;
   const annualMdrLoss = annualTurnover * mdrRate;
 
-  // SplitUPI 0% MDR tier
+  // FlowUPI 0% MDR tier
   const annualSplitUpiCost = 0;
   const annualSavings = annualMdrLoss - annualSplitUpiCost;
   const threeYearSavings = annualSavings * 3;
@@ -38,7 +38,7 @@ export default function SavingsCalculatorPage() {
           Annual MDR Savings Calculator
         </h1>
         <p className="text-xs font-bold text-txt-secondary mt-1">
-          Calculate how much your business loses to payment gateway MDR fees every year, and how SplitUPI recovers 100% of it.
+          Calculate how much your business loses to payment gateway MDR fees every year, and how FlowUPI recovers 100% of it.
         </p>
       </div>
 
@@ -111,7 +111,7 @@ export default function SavingsCalculatorPage() {
           </div>
         </div>
 
-        {/* Results & ROI Comparison Panel matching Flutter savings_calculator_view.dart */}
+        {/* Results & ROI Comparison Panel */}
         <div className="lg:col-span-6 space-y-6">
           {/* Main Savings Result Hero */}
           <div className="border-[1.5px] border-status-success bg-status-success/15 p-6 shadow-neo-success space-y-4">
@@ -121,7 +121,7 @@ export default function SavingsCalculatorPage() {
 
             <div>
               <span className="text-xs font-bold text-txt-secondary uppercase">
-                Net Annual Money Saved with SplitUPI
+                Net Annual Money Saved with FlowUPI
               </span>
               <div className="text-4xl sm:text-5xl font-black text-status-success mt-1 tracking-tight">
                 ₹{annualSavings.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
@@ -146,7 +146,7 @@ export default function SavingsCalculatorPage() {
 
             <div className="border-[1.5px] border-status-success bg-status-success/15 p-4 shadow-neo-sm">
               <div className="flex items-center gap-1 text-[10px] font-black text-status-success uppercase tracking-wider">
-                <ShieldCheck className="h-3.5 w-3.5" /> SplitUPI MDR Cost
+                <ShieldCheck className="h-3.5 w-3.5" /> FlowUPI MDR Cost
               </div>
               <div className="text-2xl font-black text-status-success mt-2">
                 ₹0.00

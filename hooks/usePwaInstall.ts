@@ -37,10 +37,10 @@ export function usePwaInstall() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((reg) => {
-          console.log('SplitUPI SW registered:', reg.scope);
+          console.log('FlowUPI SW registered:', reg.scope);
         })
         .catch((err) => {
-          console.log('SplitUPI SW registration failed:', err);
+          console.log('FlowUPI SW registration failed:', err);
         });
     }
 

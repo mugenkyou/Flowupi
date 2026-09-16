@@ -104,7 +104,7 @@ export function buildUpiUri(params: {
   const queryParams: string[] = [];
   const cleanVpa = params.vpa.trim() || 'merchant@upi';
   const cleanName = params.name.trim() || 'Merchant';
-  const cleanNote = params.note.trim() || 'SplitUPI Checkout';
+  const cleanNote = params.note.trim() || 'FlowUPI Checkout';
 
   queryParams.push(`pa=${encodeURIComponent(cleanVpa)}`);
   queryParams.push(`pn=${encodeURIComponent(cleanName)}`);
@@ -191,7 +191,7 @@ export function createTrancheOrder(params: {
   randomize?: boolean;
 }): SplitOrder {
   const orderId = `ORD${Date.now().toString().slice(-6)}`;
-  const note = params.note || 'SplitUPI Checkout';
+  const note = params.note || 'FlowUPI Checkout';
   const maxTranche = params.maxTranche || SAFE_TRANCHE_CAP;
   const randomize = params.randomize ?? true;
 

@@ -50,7 +50,7 @@ export function TrancheCard({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `SplitUPI Tranche ${tranche.index}`,
+          title: `FlowUPI Tranche ${tranche.index}`,
           text,
           url: tranche.upiUri,
         });

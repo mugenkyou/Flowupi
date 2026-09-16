@@ -24,7 +24,7 @@ export function CloutShareModal({
   const mdrSaved = calcMdrSavings(order.totalAmount);
   const trancheCount = order.tranches.length;
 
-  const shareText = `⚡ Saved ₹${mdrSaved.toFixed(2)} MDR on a ₹${order.totalAmount.toFixed(0)} bill using @SplitUPI!\n\nSplit into ${trancheCount} sub-₹2,000 tranches to pay 0% MDR fee legally! 🚀\n#UPI #Fintech #SplitUPI #ZeroMDR`;
+  const shareText = `⚡ Saved ₹${mdrSaved.toFixed(2)} MDR on a ₹${order.totalAmount.toFixed(0)} bill using @FlowUPI!\n\nSplit into ${trancheCount} sub-₹2,000 tranches to pay 0% MDR fee legally! 🚀\n#UPI #Fintech #FlowUPI #ZeroMDR`;
 
   const handleCopyText = () => {
     try {
@@ -38,7 +38,7 @@ export function CloutShareModal({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: 'SplitUPI 0% MDR Savings',
+          title: 'FlowUPI 0% MDR Savings',
           text: shareText,
           url: typeof window !== 'undefined' ? window.location.origin : '',
         });
@@ -73,7 +73,7 @@ export function CloutShareModal({
         <div className="border-[1.5px] border-brand-primary bg-bg-elevated p-5 shadow-neo-brand space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black tracking-widest text-brand-primary uppercase">
-              SPLITUPI ARBITRAGE
+              FLOWUPI ARBITRAGE
             </span>
             <ShieldCheck className="h-5 w-5 text-status-success" />
           </div>

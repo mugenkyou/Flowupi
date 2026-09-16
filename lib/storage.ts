@@ -1,8 +1,15 @@
 import { SplitOrder } from './types';
 
-export const STORAGE_VERSION = 1;
+export const FLOWUPI_STORAGE_VERSION = 1;
 
 const KEYS = {
+  VERSION: 'flowupi_version',
+  HISTORY: 'flowupi_transaction_history',
+  GROUPS: 'flowupi_group_splits',
+  PREFERENCES: 'flowupi_user_preferences',
+};
+
+const LEGACY_KEYS = {
   VERSION: 'splitupi_version',
   HISTORY: 'splitupi_transaction_history',
   GROUPS: 'splitupi_group_splits',
@@ -40,14 +47,32 @@ export interface BackupDataFormat {
 }
 
 /**
- * Ensures storage version is initialized
+ * Migration helper: Reads legacy splitupi_* keys if flowupi_* keys are not initialized
  */
-function checkStorageVersion(): void {
+function migrateLegacyStorage(): void {
   if (typeof window === 'undefined') return;
   try {
-    const current = localStorage.getItem(KEYS.VERSION);
-    if (!current) {
-      localStorage.setItem(KEYS.VERSION, String(STORAGE_VERSION));
+    const version = localStorage.getItem(KEYS.VERSION);
+    if (!version) {
+      localStorage.setItem(KEYS.VERSION, String(FLOWUPI_STORAGE_VERSION));
+
+      // Migrate History
+      const legacyHistory = localStorage.getItem(LEGACY_KEYS.HISTORY);
+      if (legacyHistory && !localStorage.getItem(KEYS.HISTORY)) {
+        localStorage.setItem(KEYS.HISTORY, legacyHistory);
+      }
+
+      // Migrate Groups
+      const legacyGroups = localStorage.getItem(LEGACY_KEYS.GROUPS);
+      if (legacyGroups && !localStorage.getItem(KEYS.GROUPS)) {
+        localStorage.setItem(KEYS.GROUPS, legacyGroups);
+      }
+
+      // Migrate Preferences
+      const legacyPrefs = localStorage.getItem(LEGACY_KEYS.PREFERENCES);
+      if (legacyPrefs && !localStorage.getItem(KEYS.PREFERENCES)) {
+        localStorage.setItem(KEYS.PREFERENCES, legacyPrefs);
+      }
     }
   } catch (_) {}
 }
@@ -57,7 +82,7 @@ function checkStorageVersion(): void {
 // -------------------------------------------------------------
 export function getSavedOrders(): SplitOrder[] {
   if (typeof window === 'undefined') return [];
-  checkStorageVersion();
+  migrateLegacyStorage();
   try {
     const raw = localStorage.getItem(KEYS.HISTORY);
     if (!raw) return [];
@@ -69,7 +94,7 @@ export function getSavedOrders(): SplitOrder[] {
 
 export function saveOrder(order: SplitOrder): void {
   if (typeof window === 'undefined') return;
-  checkStorageVersion();
+  migrateLegacyStorage();
   try {
     const orders = getSavedOrders();
     const existingIndex = orders.findIndex((o) => o.orderId === order.orderId);
@@ -102,7 +127,7 @@ export function clearHistory(): void {
 // -------------------------------------------------------------
 export function getSavedGroups(): GroupSplitRecord[] {
   if (typeof window === 'undefined') return [];
-  checkStorageVersion();
+  migrateLegacyStorage();
   try {
     const raw = localStorage.getItem(KEYS.GROUPS);
     if (!raw) return [];
@@ -114,7 +139,7 @@ export function getSavedGroups(): GroupSplitRecord[] {
 
 export function saveGroup(group: GroupSplitRecord): void {
   if (typeof window === 'undefined') return;
-  checkStorageVersion();
+  migrateLegacyStorage();
   try {
     const groups = getSavedGroups();
     const existingIndex = groups.findIndex((g) => g.id === group.id);
@@ -147,7 +172,7 @@ export function clearGroups(): void {
 // -------------------------------------------------------------
 export function getSavedPreferences(): UserPreferences {
   if (typeof window === 'undefined') return {};
-  checkStorageVersion();
+  migrateLegacyStorage();
   try {
     const raw = localStorage.getItem(KEYS.PREFERENCES);
     if (!raw) return {};
@@ -159,7 +184,7 @@ export function getSavedPreferences(): UserPreferences {
 
 export function savePreferences(prefs: Partial<UserPreferences>): void {
   if (typeof window === 'undefined') return;
-  checkStorageVersion();
+  migrateLegacyStorage();
   try {
     const existing = getSavedPreferences();
     const updated = { ...existing, ...prefs };
@@ -174,8 +199,8 @@ export function exportData(): void {
   if (typeof window === 'undefined') return;
   try {
     const backup: BackupDataFormat = {
-      appName: 'SplitUPI',
-      version: STORAGE_VERSION,
+      appName: 'FlowUPI',
+      version: FLOWUPI_STORAGE_VERSION,
       exportedAt: new Date().toISOString(),
       data: {
         history: getSavedOrders(),
@@ -191,7 +216,7 @@ export function exportData(): void {
     const a = document.createElement('a');
     const dateStr = new Date().toISOString().split('T')[0];
     a.href = url;
-    a.download = `splitupi-backup-${dateStr}.json`;
+    a.download = `flowupi-backup-${dateStr}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -209,10 +234,10 @@ export function importData(jsonContent: string): { success: boolean; message: st
   try {
     const parsed = JSON.parse(jsonContent) as Partial<BackupDataFormat>;
 
-    if (!parsed || parsed.appName !== 'SplitUPI') {
+    if (!parsed || (parsed.appName !== 'FlowUPI' && parsed.appName !== 'SplitUPI')) {
       return {
         success: false,
-        message: 'Invalid backup file: File signature does not match SplitUPI data format.',
+        message: 'Invalid backup file: File signature does not match FlowUPI data format.',
       };
     }
 
@@ -236,7 +261,7 @@ export function importData(jsonContent: string): { success: boolean; message: st
     }
 
     // Dispatch update notification event
-    window.dispatchEvent(new CustomEvent('splitupi:data_imported'));
+    window.dispatchEvent(new CustomEvent('flowupi:data_imported'));
 
     return {
       success: true,
@@ -245,7 +270,7 @@ export function importData(jsonContent: string): { success: boolean; message: st
   } catch (err) {
     return {
       success: false,
-      message: 'Failed to parse JSON file. Please select a valid SplitUPI backup JSON file.',
+      message: 'Failed to parse JSON file. Please select a valid FlowUPI backup JSON file.',
     };
   }
 }

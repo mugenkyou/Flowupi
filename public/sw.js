@@ -1,4 +1,4 @@
-const CACHE_NAME = 'splitupi-v1';
+const CACHE_NAME = 'flowupi-v1';
 const STATIC_ASSETS = [
   '/',
   '/pos',

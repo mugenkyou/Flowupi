@@ -62,7 +62,7 @@ export default function HistoryPage() {
 
   const handleBackupExport = () => {
     exportData();
-    setFeedbackMsg({ type: 'success', text: 'Exported local SplitUPI backup file.' });
+    setFeedbackMsg({ type: 'success', text: 'Exported local FlowUPI backup file.' });
     setTimeout(() => setFeedbackMsg(null), 3000);
   };
 
@@ -108,7 +108,7 @@ export default function HistoryPage() {
             Transaction History & Local Data
           </h1>
           <p className="text-xs font-bold text-txt-secondary mt-1">
-            Review past SplitUPI micro-tranche orders, export/import JSON backups, and clear local ledger records.
+            Review past FlowUPI micro-tranche orders, export/import JSON backups, and clear local ledger records.
           </p>
         </div>
 
