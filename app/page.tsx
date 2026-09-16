@@ -112,7 +112,7 @@ export default function HomePage() {
       <div id="home-file-reader" className="hidden" />
 
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-6">
+      <div className="border-b border-border-subtle pb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <NeoPopBadge label="INSTANT SCAN & PAY" variant="primary" />
@@ -125,13 +125,6 @@ export default function HomePage() {
             Scan counter QR codes or import payment screenshots to initiate sub-₹2,000 micro-tranche surcharge-free checkout.
           </p>
         </div>
-
-        <Link href="/pos">
-          <NeoPopButton variant="secondary" fullWidth={false}>
-            <Store className="h-4 w-4" />
-            <span>POS COUNTER REGISTER</span>
-          </NeoPopButton>
-        </Link>
       </div>
 
       {/* Error Alert Box */}
@@ -282,52 +275,26 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Side Feature Banner: POS Counter Register Mode */}
-      <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center border border-border-subtle bg-bg-elevated text-txt-primary shadow-neo-sm">
-              <Store className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-wider text-txt-primary">
-                Side Feature: POS Counter Register Mode
-              </h3>
-              <p className="text-xs font-bold text-txt-secondary">
-                Enter custom bill amounts, set Kirana presets, and test sub-₹2,000 tranching without scanning.
-              </p>
-            </div>
-          </div>
+      {/* Option 3: Manual UPI URI Paste Box */}
+      <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-3">
+        <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary flex items-center gap-1.5">
+          <Zap className="h-3.5 w-3.5 text-brand-primary" /> Or Paste Raw UPI Intent Link Directly
+        </span>
 
-          <Link href="/pos">
-            <NeoPopButton variant="surface" fullWidth={false}>
-              <span>OPEN POS TERMINAL</span>
-              <ArrowRight className="h-4 w-4" />
-            </NeoPopButton>
-          </Link>
-        </div>
+        <form onSubmit={handlePasteSubmit} className="space-y-3">
+          <textarea
+            rows={2}
+            value={pastedUri}
+            onChange={(e) => setPastedUri(e.target.value)}
+            placeholder="upi://pay?pa=merchant@upi&pn=MerchantName&am=6800..."
+            className="w-full border border-border-subtle bg-bg-elevated p-3 text-xs text-txt-primary font-mono placeholder:text-txt-muted focus:border-brand-primary focus:outline-none"
+          />
 
-        {/* Option 3: Manual UPI URI Paste Box */}
-        <div className="space-y-3 pt-2">
-          <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary flex items-center gap-1.5">
-            <Zap className="h-3.5 w-3.5 text-brand-primary" /> Or Paste Raw UPI Intent Link Directly
-          </span>
-
-          <form onSubmit={handlePasteSubmit} className="space-y-3">
-            <textarea
-              rows={2}
-              value={pastedUri}
-              onChange={(e) => setPastedUri(e.target.value)}
-              placeholder="upi://pay?pa=merchant@upi&pn=MerchantName&am=6800..."
-              className="w-full border border-border-subtle bg-bg-elevated p-3 text-xs text-txt-primary font-mono placeholder:text-txt-muted focus:border-brand-primary focus:outline-none"
-            />
-
-            <NeoPopButton type="submit" variant="surface">
-              <span>PARSE & PROCESS UPI LINK</span>
-              <ArrowRight className="h-4 w-4" />
-            </NeoPopButton>
-          </form>
-        </div>
+          <NeoPopButton type="submit" variant="surface">
+            <span>PARSE & PROCESS UPI LINK</span>
+            <ArrowRight className="h-4 w-4" />
+          </NeoPopButton>
+        </form>
       </div>
 
       {/* Camera Scanner Modal */}
