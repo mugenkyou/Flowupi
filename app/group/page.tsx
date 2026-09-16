@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Users,
   Zap,
@@ -8,6 +9,10 @@ import {
   Check,
   QrCode,
   MessageCircle,
+  Camera,
+  Upload,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { createGroupSplitOrder } from '../../lib/splitEngine';
 import { SplitOrder } from '../../lib/types';
@@ -15,6 +20,11 @@ import { saveOrder, saveGroup } from '../../lib/storage';
 import { TrancheCard } from '../../components/TrancheCard';
 import { SplitCheckoutModal } from '../../components/SplitCheckoutModal';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
+
+const QRScannerModal = dynamic(
+  () => import('../../components/QRScannerModal').then((mod) => mod.QRScannerModal),
+  { ssr: false }
+);
 
 export default function GroupSplitPage() {
   const [totalAmount, setTotalAmount] = useState<number>(5400);
@@ -25,6 +35,10 @@ export default function GroupSplitPage() {
   const [groupOrder, setGroupOrder] = useState<SplitOrder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [copiedGroupShare, setCopiedGroupShare] = useState<boolean>(false);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState<boolean>(false);
+  const [isDecodingQr, setIsDecodingQr] = useState<boolean>(false);
+  const [autoFilledFromQr, setAutoFilledFromQr] = useState<boolean>(false);
+  const groupFileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePeopleChange = (num: number) => {
     const valid = Math.max(1, Math.min(10, num));
@@ -41,6 +55,51 @@ export default function GroupSplitPage() {
     const updated = [...friendNames];
     updated[index] = val;
     setFriendNames(updated);
+  };
+
+  const applyScannedPayload = (payload: { pa: string; pn: string; qrAmount?: number }) => {
+    if (payload.pa) {
+      setMerchantVpa(payload.pa);
+    }
+    if (payload.pn) {
+      setMerchantName(payload.pn);
+    } else if (payload.pa) {
+      const handle = payload.pa.split('@')[0];
+      setMerchantName(handle.charAt(0).toUpperCase() + handle.slice(1));
+    }
+    if (payload.qrAmount && payload.qrAmount > 0) {
+      setTotalAmount(payload.qrAmount);
+    }
+    setAutoFilledFromQr(true);
+    setTimeout(() => setAutoFilledFromQr(false), 4000);
+  };
+
+  const handleGroupFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsDecodingQr(true);
+      const { decodeQrFromImageFile } = await import('../../lib/qrDecoder');
+      const { parseUpiUri } = await import('../../lib/splitEngine');
+      const rawResult = await decodeQrFromImageFile(file);
+      const parsed = parseUpiUri(rawResult);
+
+      if (parsed.pa) {
+        applyScannedPayload({
+          pa: parsed.pa,
+          pn: parsed.pn || 'Merchant',
+          qrAmount: parsed.am ? parseFloat(parsed.am) : undefined,
+        });
+      } else {
+        alert('Invalid UPI QR Code: Could not find a valid merchant UPI VPA in the uploaded image.');
+      }
+    } catch (_) {
+      alert('Could not decode QR code from the uploaded image file. Please try scanning with camera or manual entry.');
+    } finally {
+      setIsDecodingQr(false);
+      e.target.value = '';
+    }
   };
 
   const handleGenerateGroupSplit = (e?: React.FormEvent) => {
@@ -187,30 +246,86 @@ export default function GroupSplitPage() {
               </div>
             </div>
 
-            {/* Merchant Details */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
-                  Merchant Name
-                </label>
-                <input
-                  type="text"
-                  value={merchantName}
-                  onChange={(e) => setMerchantName(e.target.value)}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
-                />
+            {/* Merchant Details & QR Auto-Fill */}
+            <div className="space-y-3 pt-2 border-t border-border-subtle/60">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary">
+                  Merchant Payee Information
+                </span>
+                {autoFilledFromQr && (
+                  <span className="text-[10px] font-black text-status-success uppercase flex items-center gap-1 animate-bounce">
+                    <CheckCircle2 className="h-3 w-3" /> Auto-Filled from QR!
+                  </span>
+                )}
               </div>
 
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
-                  Merchant VPA
-                </label>
-                <input
-                  type="text"
-                  value={merchantVpa}
-                  onChange={(e) => setMerchantVpa(e.target.value)}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
-                />
+              {/* QR Auto-Fill Action Box */}
+              <div className="border border-brand-primary/30 bg-brand-primary/5 p-3 space-y-2">
+                <span className="text-[10px] font-black text-brand-primary uppercase tracking-wider flex items-center gap-1">
+                  <Camera className="h-3 w-3" /> Auto-Fill Payee & Amount via QR
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsQrScannerOpen(true)}
+                    className="flex-1 min-h-[36px] px-2.5 border border-brand-primary bg-brand-primary/10 text-brand-primary font-black text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-neo-sm hover:bg-brand-primary/20 transition-all active:translate-x-0.5 active:translate-y-0.5"
+                  >
+                    <Camera className="h-3.5 w-3.5" /> Scan QR
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => groupFileInputRef.current?.click()}
+                    disabled={isDecodingQr}
+                    className="flex-1 min-h-[36px] px-2.5 border border-border-subtle bg-bg-elevated text-txt-primary font-black text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50"
+                  >
+                    {isDecodingQr ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Decoding...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-3.5 w-3.5" /> Upload QR Image
+                      </>
+                    )}
+                  </button>
+                  <input
+                    ref={groupFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleGroupFileUpload}
+                    className="hidden"
+                    aria-label="Upload merchant QR code image for group split"
+                  />
+                </div>
+              </div>
+
+              {/* Manual Editable Fields */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
+                    Merchant Name
+                  </label>
+                  <input
+                    type="text"
+                    value={merchantName}
+                    onChange={(e) => setMerchantName(e.target.value)}
+                    placeholder="e.g. Bistro Grill"
+                    className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
+                    Merchant VPA
+                  </label>
+                  <input
+                    type="text"
+                    value={merchantVpa}
+                    onChange={(e) => setMerchantVpa(e.target.value)}
+                    placeholder="e.g. bistro@upi"
+                    className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none font-mono"
+                  />
+                </div>
               </div>
             </div>
 
@@ -300,6 +415,18 @@ export default function GroupSplitPage() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onOrderUpdated={(ord) => setGroupOrder(ord)}
+        />
+      )}
+
+      {/* Merchant QR Auto-Fill Scanner Modal */}
+      {isQrScannerOpen && (
+        <QRScannerModal
+          isOpen={isQrScannerOpen}
+          onClose={() => setIsQrScannerOpen(false)}
+          onScannedPayload={(payload) => {
+            setIsQrScannerOpen(false);
+            applyScannedPayload(payload);
+          }}
         />
       )}
     </div>
