@@ -133,10 +133,10 @@ export function TrancheCard({
         <a
           href={tranche.upiUri}
           target="_self"
-          className="flex-1 min-w-[130px]"
+          className="flex-1 min-w-[140px]"
         >
-          <NeoPopButton variant="primary" fullWidth>
-            <ExternalLink className="h-3.5 w-3.5" />
+          <NeoPopButton variant="primary" fullWidth className="min-h-[44px]">
+            <ExternalLink className="h-4 w-4" />
             <span>Open UPI App</span>
           </NeoPopButton>
         </a>
@@ -147,38 +147,41 @@ export function TrancheCard({
             onClick={() => onStatusChange(tranche.id, isPaid ? 'pending' : 'paid')}
             variant={isPaid ? 'success' : 'surface'}
             fullWidth={false}
+            className="min-h-[44px]"
           >
             <span>{isPaid ? '✓ Paid' : 'Mark Paid'}</span>
           </NeoPopButton>
         )}
 
-        {/* Soundbox Trigger */}
-        <button
-          onClick={handleSoundboxAlert}
-          disabled={isPlayingAudio}
-          title="Simulate Soundbox Audio Confirmation"
-          className="flex items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated p-3 text-brand-violet shadow-neo-sm hover:border-brand-violet transition-all active:translate-x-0.5 active:translate-y-0.5"
-        >
-          <Volume2 className={`h-4 w-4 ${isPlayingAudio ? 'animate-bounce' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Soundbox Trigger */}
+          <button
+            onClick={handleSoundboxAlert}
+            disabled={isPlayingAudio}
+            title="Simulate Soundbox Audio Confirmation"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated p-2.5 text-brand-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            <Volume2 className={`h-4 w-4 ${isPlayingAudio ? 'animate-bounce' : ''}`} />
+          </button>
 
-        {/* Copy UPI URI */}
-        <button
-          onClick={handleCopyUri}
-          title="Copy raw UPI URI"
-          className="flex items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated p-3 text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-cyan transition-all active:translate-x-0.5 active:translate-y-0.5"
-        >
-          {copied ? <Check className="h-4 w-4 text-status-success" /> : <Copy className="h-4 w-4" />}
-        </button>
+          {/* Copy UPI URI */}
+          <button
+            onClick={handleCopyUri}
+            title="Copy raw UPI URI"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated p-2.5 text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            {copied ? <Check className="h-4 w-4 text-status-success" /> : <Copy className="h-4 w-4" />}
+          </button>
 
-        {/* Share */}
-        <button
-          onClick={handleShare}
-          title="Share Tranche QR"
-          className="flex items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated p-3 text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-cyan transition-all active:translate-x-0.5 active:translate-y-0.5"
-        >
-          <Share2 className="h-4 w-4" />
-        </button>
+          {/* Share */}
+          <button
+            onClick={handleShare}
+            title="Share Tranche QR"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated p-2.5 text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

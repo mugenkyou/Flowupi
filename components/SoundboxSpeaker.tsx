@@ -77,6 +77,7 @@ export function SoundboxSpeaker({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               value={amount}
               onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
               className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-sm font-black text-txt-primary focus:border-brand-primary focus:outline-none"

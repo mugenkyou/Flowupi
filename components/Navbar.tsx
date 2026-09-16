@@ -103,31 +103,53 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
           </div>
         </div>
 
-        {/* Mobile Bottom Navigation Bar matching Flutter NavigationBar */}
-        <div className="flex items-center justify-around border-t border-border-subtle bg-bg py-2 md:hidden">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
+        {/* Mobile Navigation Header (Clean 3-Line Layout) */}
+        <div className="flex flex-col border-t border-border-subtle bg-bg-surface md:hidden">
+          {/* Line 2: Primary Payment Workstations */}
+          <div className="grid grid-cols-3 border-b border-border-subtle/50">
+            {navItems.slice(0, 3).map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-1 text-[10px] font-black uppercase tracking-wider transition-all ${
-                  isActive ? 'text-brand-primary' : 'text-txt-secondary'
-                }`}
-              >
-                <div
-                  className={`flex items-center justify-center rounded-full px-3 py-1 transition-all ${
-                    isActive ? 'bg-brand-primary/20' : 'bg-transparent'
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center justify-center gap-1 min-h-[44px] py-2 text-[10px] font-black uppercase tracking-wider border-r border-border-subtle/50 last:border-r-0 transition-all active:bg-brand-primary/10 ${
+                    isActive
+                      ? 'bg-brand-primary/15 text-brand-primary font-black'
+                      : 'text-txt-secondary hover:text-txt-primary'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                </div>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Line 3: Utility Tools & History Ledger */}
+          <div className="grid grid-cols-3">
+            {navItems.slice(3, 6).map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center justify-center gap-1 min-h-[44px] py-2 text-[10px] font-black uppercase tracking-wider border-r border-border-subtle/50 last:border-r-0 transition-all active:bg-brand-primary/10 ${
+                    isActive
+                      ? 'bg-brand-primary/15 text-brand-primary font-black'
+                      : 'text-txt-secondary hover:text-txt-primary'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </header>
 

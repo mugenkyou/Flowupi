@@ -170,6 +170,7 @@ export default function HomePage() {
                 <span className="absolute left-3 top-2.5 text-lg font-black text-txt-muted">₹</span>
                 <input
                   type="number"
+                  inputMode="decimal"
                   value={customAmount}
                   onChange={(e) => setCustomAmount(parseFloat(e.target.value) || 0)}
                   className="w-full border-[1.5px] border-border-subtle bg-bg-elevated py-2.5 pl-8 pr-3 text-xl font-black text-txt-primary focus:border-brand-primary focus:outline-none shadow-neo-sm"

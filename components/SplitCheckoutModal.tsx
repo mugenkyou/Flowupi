@@ -264,7 +264,7 @@ export function SplitCheckoutModal({
                       onClick={() => setActiveTrancheIndex(idx)}
                       className={`flex flex-col p-2.5 border-[1.5px] text-left transition-all ${
                         isActive
-                          ? 'border-brand-cyan bg-brand-cyan/20 shadow-neo-cyan'
+                          ? 'border-brand-primary bg-brand-primary/20 shadow-neo-brand'
                           : isPaid
                           ? 'border-status-success bg-status-success/15'
                           : 'border-border-subtle bg-bg-elevated hover:border-border-neo'
@@ -293,7 +293,7 @@ export function SplitCheckoutModal({
                   onClick={() =>
                     playSoundboxConfirmation(order.totalAmount, order.merchantName)
                   }
-                  variant="violet"
+                  variant="secondary"
                 >
                   <Volume2 className="h-4 w-4" />
                   <span>SOUNDBOX ALERT</span>

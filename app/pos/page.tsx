@@ -174,6 +174,7 @@ export default function PosPage() {
                 <span className="absolute left-3 top-2.5 text-lg font-black text-txt-muted">₹</span>
                 <input
                   type="number"
+                  inputMode="decimal"
                   value={billAmount}
                   onChange={(e) => {
                     const amt = parseFloat(e.target.value) || 0;
