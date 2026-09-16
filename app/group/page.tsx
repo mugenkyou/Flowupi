@@ -7,6 +7,7 @@ import {
   Copy,
   Check,
   QrCode,
+  MessageCircle,
 } from 'lucide-react';
 import { createGroupSplitOrder } from '../../lib/splitEngine';
 import { SplitOrder } from '../../lib/types';
@@ -224,13 +225,27 @@ export default function GroupSplitPage() {
               <span className="text-xs font-black uppercase tracking-wider text-txt-secondary">
                 WhatsApp Group Share Text
               </span>
-              <button
-                onClick={handleCopyGroupShare}
-                className="flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline"
-              >
-                {copiedGroupShare ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copiedGroupShare ? 'Copied' : 'Copy'}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(groupShareText)}`;
+                    window.open(waUrl, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="flex items-center gap-1 text-xs font-bold text-status-success hover:underline"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span>Share</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyGroupShare}
+                  className="flex items-center gap-1 text-xs font-bold text-brand-blue hover:underline"
+                >
+                  {copiedGroupShare ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span>{copiedGroupShare ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
             </div>
             <textarea
               readOnly

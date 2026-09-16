@@ -38,8 +38,93 @@ export function QRScannerModal({
   const [pastedUri, setPastedUri] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isScanning, setIsScanning] = useState(false);
+  const [isDecodingFile, setIsDecodingFile] = useState(false);
+  const modalFileInputRef = useRef<HTMLInputElement>(null);
   const scannerRef = useRef<any>(null);
   const isProcessingRef = useRef<boolean>(false);
+
+  const stopCamera = React.useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        if (scannerRef.current.isScanning) {
+          await scannerRef.current.stop();
+        }
+        scannerRef.current.clear();
+      } catch (_) {}
+      scannerRef.current = null;
+    }
+    setIsScanning(false);
+  }, []);
+
+  const handleScannedResult = React.useCallback(
+    (rawData: string) => {
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
+      stopCamera();
+      const parsed = parseUpiUri(rawData);
+
+      if (!parsed.pa) {
+        isProcessingRef.current = false;
+        setErrorMsg('Invalid UPI QR code or VPA missing. Please scan a valid merchant UPI QR.');
+        return;
+      }
+
+      const qrAmt = parsed.am && !isNaN(parseFloat(parsed.am)) && parseFloat(parsed.am) > 0
+        ? parseFloat(parsed.am)
+        : undefined;
+
+      const payload: ScannedPayload = {
+        pa: parsed.pa,
+        pn: parsed.pn || 'Merchant',
+        note: parsed.tn || 'Scan & Pay Checkout',
+        qrAmount: qrAmt,
+      };
+
+      if (onScannedPayload) {
+        onScannedPayload(payload);
+      } else if (onOrderCreated) {
+        if (qrAmt) {
+          const order = createTrancheOrder({
+            totalAmount: qrAmt,
+            merchantVpa: payload.pa,
+            merchantName: payload.pn,
+            note: payload.note,
+          });
+          saveOrder(order);
+          onOrderCreated(order);
+        }
+      }
+      onClose();
+    },
+    [stopCamera, onScannedPayload, onOrderCreated, onClose]
+  );
+
+  const handleScannedResultRef = useRef(handleScannedResult);
+  useEffect(() => {
+    handleScannedResultRef.current = handleScannedResult;
+  }, [handleScannedResult]);
+
+  const startCamera = React.useCallback(async () => {
+    try {
+      setErrorMsg('');
+      const { Html5Qrcode } = await import('html5-qrcode');
+      const html5QrCode = new Html5Qrcode('qr-reader');
+      scannerRef.current = html5QrCode;
+
+      await html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        (decodedText) => {
+          handleScannedResultRef.current(decodedText);
+        },
+        () => {}
+      );
+      setIsScanning(true);
+    } catch (err: unknown) {
+      setIsScanning(false);
+      setErrorMsg('Camera access denied or unavailable. Please try uploading an image or pasting a UPI link.');
+    }
+  }, []);
 
   useEffect(() => {
     isProcessingRef.current = false;
@@ -53,82 +138,7 @@ export function QRScannerModal({
     return () => {
       stopCamera();
     };
-  }, [isOpen, activeTab]);
-
-  const startCamera = async () => {
-    try {
-      setErrorMsg('');
-      const { Html5Qrcode } = await import('html5-qrcode');
-      const html5QrCode = new Html5Qrcode('qr-reader');
-      scannerRef.current = html5QrCode;
-
-      await html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        (decodedText) => {
-          handleScannedResult(decodedText);
-        },
-        () => {}
-      );
-      setIsScanning(true);
-    } catch (err: unknown) {
-      setIsScanning(false);
-      setErrorMsg('Camera access denied or unavailable. Please try uploading an image or pasting a UPI link.');
-    }
-  };
-
-  const stopCamera = async () => {
-    if (scannerRef.current) {
-      try {
-        if (scannerRef.current.isScanning) {
-          await scannerRef.current.stop();
-        }
-        scannerRef.current.clear();
-      } catch (_) {}
-      scannerRef.current = null;
-    }
-    setIsScanning(false);
-  };
-
-  const handleScannedResult = (rawData: string) => {
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
-    stopCamera();
-    const parsed = parseUpiUri(rawData);
-
-    if (!parsed.pa) {
-      isProcessingRef.current = false;
-      setErrorMsg('Invalid UPI QR code or VPA missing. Please scan a valid merchant UPI QR.');
-      return;
-    }
-
-    const qrAmt = parsed.am && !isNaN(parseFloat(parsed.am)) && parseFloat(parsed.am) > 0
-      ? parseFloat(parsed.am)
-      : undefined;
-
-    const payload: ScannedPayload = {
-      pa: parsed.pa,
-      pn: parsed.pn || 'Merchant',
-      note: parsed.tn || 'Scan & Pay Checkout',
-      qrAmount: qrAmt,
-    };
-
-    if (onScannedPayload) {
-      onScannedPayload(payload);
-    } else if (onOrderCreated) {
-      if (qrAmt) {
-        const order = createTrancheOrder({
-          totalAmount: qrAmt,
-          merchantVpa: payload.pa,
-          merchantName: payload.pn,
-          note: payload.note,
-        });
-        saveOrder(order);
-        onOrderCreated(order);
-      }
-    }
-    onClose();
-  };
+  }, [isOpen, activeTab, startCamera, stopCamera]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,13 +146,18 @@ export function QRScannerModal({
 
     try {
       setErrorMsg('');
-      const { Html5Qrcode } = await import('html5-qrcode');
-      const html5QrCode = new Html5Qrcode('qr-reader-file');
-      const result = await html5QrCode.scanFile(file, true);
+      setIsDecodingFile(true);
+      const { decodeQrFromImageFile } = await import('../lib/qrDecoder');
+      const result = await decodeQrFromImageFile(file);
       handleScannedResult(result);
-    } catch (_) {
-      setErrorMsg('Could not detect a valid UPI QR code in the uploaded image.');
+    } catch (err: any) {
+      if (err?.message === 'INVALID_FILE_TYPE') {
+        setErrorMsg('Invalid file format. Please select a valid PNG, JPG, or WebP image.');
+      } else {
+        setErrorMsg('Could not detect a valid UPI QR code in the uploaded image. Try a clearer image or scanning with camera.');
+      }
     } finally {
+      setIsDecodingFile(false);
       e.target.value = '';
     }
   };
@@ -239,21 +254,27 @@ export function QRScannerModal({
 
           {activeTab === 'upload' && (
             <div className="flex flex-col items-center justify-center border-2 border-dashed border-border-subtle rounded-2xl p-8 hover:border-brand-cyan/50 transition-all">
-              <div id="qr-reader-file" className="hidden" />
               <Upload className="h-10 w-10 text-brand-cyan mb-2" />
               <p className="text-sm font-bold text-txt-primary">Select QR Screenshot</p>
               <p className="text-xs text-txt-muted mt-1 mb-4 text-center">
                 Supports PNG, JPG, WEBP merchant payment QR images
               </p>
-              <label className="cursor-pointer rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue px-5 py-2.5 text-xs font-bold text-bg shadow-md hover:brightness-110 active:scale-95">
-                Browse File
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </label>
+              <input
+                ref={modalFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+                aria-label="Upload QR screenshot file"
+              />
+              <button
+                type="button"
+                onClick={() => modalFileInputRef.current?.click()}
+                disabled={isDecodingFile}
+                className="rounded-xl bg-gradient-to-r from-brand-cyan to-brand-blue px-5 py-2.5 text-xs font-bold text-bg shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+              >
+                {isDecodingFile ? 'Decoding QR Screenshot...' : 'Browse File'}
+              </button>
             </div>
           )}
 

@@ -12,6 +12,7 @@ import {
   Lock,
   ArrowRight,
   ShieldCheck,
+  MessageCircle,
 } from 'lucide-react';
 import { playSoundboxConfirmation } from '../lib/soundbox';
 import { NeoPopBadge, NeoPopButton } from './NeoPopComponents';
@@ -36,6 +37,7 @@ export function TrancheCard({
   isLocked = false,
 }: TrancheCardProps) {
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [upiLaunched, setUpiLaunched] = useState(false);
 
@@ -52,18 +54,40 @@ export function TrancheCard({
   };
 
   const handleShare = async () => {
-    const text = `Pay ₹${tranche.amount.toFixed(2)} tranche ${tranche.index}/${totalTranches} via UPI:\n${tranche.upiUri}`;
-    if (navigator.share) {
+    const payerStr = tranche.payerName ? ` (${tranche.payerName})` : '';
+    const text = `Pay ₹${tranche.amount.toFixed(2)}${payerStr} for ${merchantName} via UPI:\n${tranche.upiUri}`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `FlowUPI Tranche ${tranche.index}`,
+          title: `FlowUPI Tranche #${tranche.index} for ${merchantName}`,
           text,
-          url: tranche.upiUri,
         });
-      } catch (_) {}
-    } else {
-      handleCopyUri();
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+        return;
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return;
+      }
     }
+
+    // Fallback: Copy payment details and link to clipboard
+    try {
+      await navigator.clipboard.writeText(text);
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+    } catch (_) {
+      // Direct WhatsApp Web fallback if clipboard write fails
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleWhatsAppShare = () => {
+    const payerStr = tranche.payerName ? ` (${tranche.payerName})` : '';
+    const text = `Pay ₹${tranche.amount.toFixed(2)}${payerStr} for ${merchantName} via UPI:\n${tranche.upiUri}`;
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleOpenUpiApp = () => {
@@ -215,10 +239,11 @@ export function TrancheCard({
             </div>
           )}
 
-          {/* Secondary Actions: Copy, Soundbox, Share */}
-          <div className="flex items-center justify-between gap-2 pt-1">
-            <div className="flex items-center gap-2">
+          {/* Secondary Actions: Copy, Soundbox, Share & WhatsApp */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={handleSoundboxAlert}
                 disabled={isPlayingAudio}
                 title="Simulate Soundbox Audio Alert"
@@ -229,6 +254,7 @@ export function TrancheCard({
               </button>
 
               <button
+                type="button"
                 onClick={handleCopyUri}
                 title="Copy UPI Intent URI"
                 className="flex min-h-[38px] px-3 items-center gap-1.5 border border-border-subtle bg-bg-elevated text-xs font-bold text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
@@ -247,14 +273,36 @@ export function TrancheCard({
               </button>
             </div>
 
-            <button
-              onClick={handleShare}
-              title="Share Tranche"
-              className="flex min-h-[38px] px-3 items-center gap-1.5 border border-border-subtle bg-bg-elevated text-xs font-bold text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
-            >
-              <Share2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Share</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleWhatsAppShare}
+                title="Share via WhatsApp"
+                className="flex min-h-[38px] px-3 items-center gap-1.5 border border-status-success/50 bg-status-success/15 text-xs font-bold text-status-success hover:bg-status-success/25 shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5"
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">WhatsApp</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                title="Share Tranche"
+                className="flex min-h-[38px] px-3 items-center gap-1.5 border border-border-subtle bg-bg-elevated text-xs font-bold text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
+              >
+                {shared ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-status-success" />
+                    <span className="text-status-success">Shared!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Share</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

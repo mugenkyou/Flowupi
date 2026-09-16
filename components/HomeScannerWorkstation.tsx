@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import {
   QrCode,
@@ -13,6 +13,7 @@ import {
   RotateCcw,
   CheckCircle2,
   Edit3,
+  Loader2,
 } from 'lucide-react';
 import { parseUpiUri, createTrancheOrder } from '../lib/splitEngine';
 import { SplitOrder } from '../lib/types';
@@ -37,6 +38,8 @@ export function HomeScannerWorkstation() {
   const [paymentContext, setPaymentContext] = useState<ScannedPayload | null>(null);
   const [amountInput, setAmountInput] = useState<string>('');
   const [activeOrder, setActiveOrder] = useState<SplitOrder | null>(null);
+  const [isDecodingFile, setIsDecodingFile] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleQrScannedEvent = (e: Event) => {
@@ -86,13 +89,18 @@ export function HomeScannerWorkstation() {
 
     try {
       setErrorMsg('');
-      const { Html5Qrcode } = await import('html5-qrcode');
-      const html5QrCode = new Html5Qrcode('home-file-reader');
-      const result = await html5QrCode.scanFile(file, true);
+      setIsDecodingFile(true);
+      const { decodeQrFromImageFile } = await import('../lib/qrDecoder');
+      const result = await decodeQrFromImageFile(file);
       processDecodedResult(result);
-    } catch (_) {
-      setErrorMsg('COULD NOT DECODE QR: Unable to detect a valid UPI QR code in the uploaded image file.');
+    } catch (err: any) {
+      if (err?.message === 'INVALID_FILE_TYPE') {
+        setErrorMsg('INVALID FILE FORMAT: Please select a valid image file (PNG, JPG, WebP).');
+      } else {
+        setErrorMsg('COULD NOT DECODE QR: Unable to detect a valid UPI QR code in the uploaded image file. Try a clearer image or scan with camera.');
+      }
     } finally {
+      setIsDecodingFile(false);
       e.target.value = '';
     }
   };
@@ -320,18 +328,33 @@ export function HomeScannerWorkstation() {
                 </p>
               </div>
 
-              <label className="cursor-pointer block">
+              <div>
                 <input
+                  ref={fileInputRef}
+                  id="home-qr-file-input"
                   type="file"
                   accept="image/*"
                   onChange={handleFileUpload}
                   className="hidden"
                   aria-label="Upload QR screenshot file"
                 />
-                <NeoPopButton variant="secondary" type="button">
-                  <Upload className="h-4 w-4" /> IMPORT QR SCREENSHOT
+                <NeoPopButton
+                  variant="secondary"
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isDecodingFile}
+                >
+                  {isDecodingFile ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> DECODING QR SCREENSHOT...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" /> IMPORT QR SCREENSHOT
+                    </>
+                  )}
                 </NeoPopButton>
-              </label>
+              </div>
             </div>
           </div>
 
