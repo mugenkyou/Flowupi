@@ -107,10 +107,10 @@ export default function GroupSplitPage() {
             className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-5"
           >
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <span className="text-xs font-black uppercase tracking-wider text-brand-blue flex items-center gap-1.5">
+              <span className="text-xs font-black uppercase tracking-wider text-brand-primary flex items-center gap-1.5">
                 <Zap className="h-4 w-4" /> Group Split Setup
               </span>
-              <span className="text-xs font-black text-brand-cyan">₹{perPersonShare} / person</span>
+              <span className="text-xs font-black text-brand-primary">₹{perPersonShare} / person</span>
             </div>
 
             <div>
@@ -123,7 +123,7 @@ export default function GroupSplitPage() {
                   type="number"
                   value={totalAmount}
                   onChange={(e) => setTotalAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated py-2.5 pl-8 pr-3 text-xl font-black text-txt-primary focus:border-brand-blue focus:outline-none shadow-neo-sm"
+                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated py-2.5 pl-8 pr-3 text-xl font-black text-txt-primary focus:border-brand-primary focus:outline-none shadow-neo-sm"
                   required
                 />
               </div>
@@ -138,17 +138,17 @@ export default function GroupSplitPage() {
                 <button
                   type="button"
                   onClick={() => handlePeopleChange(numberOfPeople - 1)}
-                  className="flex h-10 w-10 items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated text-lg font-black text-txt-primary shadow-neo-sm hover:border-brand-blue"
+                  className="flex h-10 w-10 items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated text-lg font-black text-txt-primary shadow-neo-sm hover:border-brand-primary"
                 >
                   -
                 </button>
-                <span className="text-xl font-black text-brand-blue px-2">
+                <span className="text-xl font-black text-brand-primary px-2">
                   {numberOfPeople}
                 </span>
                 <button
                   type="button"
                   onClick={() => handlePeopleChange(numberOfPeople + 1)}
-                  className="flex h-10 w-10 items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated text-lg font-black text-txt-primary shadow-neo-sm hover:border-brand-blue"
+                  className="flex h-10 w-10 items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated text-lg font-black text-txt-primary shadow-neo-sm hover:border-brand-primary"
                 >
                   +
                 </button>
@@ -168,7 +168,7 @@ export default function GroupSplitPage() {
                     value={name}
                     onChange={(e) => handleFriendNameChange(idx, e.target.value)}
                     placeholder={`Friend #${idx + 1}`}
-                    className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-blue focus:outline-none"
+                    className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
                   />
                 ))}
               </div>
@@ -184,7 +184,7 @@ export default function GroupSplitPage() {
                   type="text"
                   value={merchantName}
                   onChange={(e) => setMerchantName(e.target.value)}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-blue focus:outline-none"
+                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
                 />
               </div>
 
@@ -196,10 +196,14 @@ export default function GroupSplitPage() {
                   type="text"
                   value={merchantVpa}
                   onChange={(e) => setMerchantVpa(e.target.value)}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-blue focus:outline-none"
+                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
                 />
               </div>
             </div>
+
+            <NeoPopButton type="submit" variant="primary">
+              <Zap className="h-4 w-4" /> GENERATE GROUP TRANCHE SLICES
+            </NeoPopButton>
 
             <NeoPopButton
               type="submit"

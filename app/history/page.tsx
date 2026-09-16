@@ -14,6 +14,7 @@ import { SplitOrder } from '../../lib/types';
 import { getSavedOrders, deleteOrder, clearHistory } from '../../lib/storage';
 import { calcMdrSavings, calcPaidAmount, calcProgress } from '../../lib/splitEngine';
 import { SplitCheckoutModal } from '../../components/SplitCheckoutModal';
+import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
 
 export default function HistoryPage() {
   const [orders, setOrders] = useState<SplitOrder[]>([]);
@@ -50,31 +51,34 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-cyan/30 bg-brand-cyan/10 px-3 py-1 text-xs font-extrabold text-brand-cyan mb-2">
-            <History className="h-3.5 w-3.5" /> Transaction Logs & Local Persistence
+          <div className="flex items-center gap-2 mb-2">
+            <NeoPopBadge label="TRANSACTION LOGS" variant="primary" />
+            <NeoPopBadge label="LOCAL STORAGE LEDGER" variant="secondary" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-txt-primary">
+          <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
             Transaction History
           </h1>
-          <p className="text-xs text-txt-secondary mt-1">
+          <p className="text-xs font-bold text-txt-secondary mt-1">
             Review past SplitUPI micro-tranche orders, check payment settlement progress, and resume pending checkouts.
           </p>
         </div>
 
         {orders.length > 0 && (
-          <button
+          <NeoPopButton
             onClick={handleClearAll}
-            className="flex items-center gap-1.5 rounded-xl border border-status-error/30 bg-status-error/10 px-4 py-2.5 text-xs font-bold text-status-error hover:bg-status-error/20 transition-all"
+            variant="error"
+            fullWidth={false}
           >
-            <Trash2 className="h-4 w-4" /> Clear History
-          </button>
+            <Trash2 className="h-4 w-4" />
+            <span>CLEAR HISTORY</span>
+          </NeoPopButton>
         )}
       </div>
 
       {/* Analytics Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-border-subtle bg-bg-surface p-4">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-txt-muted">
+        <div className="border-[1.5px] border-border-subtle bg-bg-surface p-4 shadow-neo">
+          <span className="text-[10px] font-black uppercase tracking-wider text-txt-muted">
             Total Split Orders
           </span>
           <div className="text-2xl font-black text-txt-primary mt-1">
@@ -82,17 +86,17 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border-subtle bg-bg-surface p-4">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-txt-muted">
+        <div className="border-[1.5px] border-border-subtle bg-bg-surface p-4 shadow-neo">
+          <span className="text-[10px] font-black uppercase tracking-wider text-txt-muted">
             Total Volume Processed
           </span>
-          <div className="text-2xl font-black text-brand-cyan mt-1">
+          <div className="text-2xl font-black text-brand-primary mt-1">
             ₹{totalVolume.toLocaleString('en-IN')}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-status-success/30 bg-status-success/10 p-4">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-status-success">
+        <div className="border-[1.5px] border-status-success bg-status-success/10 p-4 shadow-neo-success">
+          <span className="text-[10px] font-black uppercase tracking-wider text-status-success">
             Total Gateway MDR Saved
           </span>
           <div className="text-2xl font-black text-status-success mt-1">
@@ -107,10 +111,10 @@ export default function HistoryPage() {
           <button
             key={tab}
             onClick={() => setFilter(tab)}
-            className={`rounded-xl px-4 py-2 text-xs font-bold capitalize transition-all ${
+            className={`border-[1.5px] px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all ${
               filter === tab
-                ? 'bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40'
-                : 'text-txt-secondary hover:text-txt-primary'
+                ? 'border-brand-primary bg-brand-primary/10 text-brand-primary shadow-neo-sm'
+                : 'border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary'
             }`}
           >
             {tab} Orders ({orders.filter((o) => {
@@ -125,9 +129,9 @@ export default function HistoryPage() {
 
       {/* Orders List */}
       {filteredOrders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center border border-border-subtle rounded-3xl bg-bg-surface text-txt-muted space-y-2">
+        <div className="flex flex-col items-center justify-center py-16 text-center border-[1.5px] border-border-subtle bg-bg-surface text-txt-muted space-y-2 shadow-neo">
           <QrCode className="h-10 w-10 text-txt-muted/50 mb-1" />
-          <p className="text-sm font-bold">No transactions found in this category.</p>
+          <p className="text-sm font-black text-txt-primary">No transactions found in this category.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -141,22 +145,22 @@ export default function HistoryPage() {
               <div
                 key={ord.orderId}
                 onClick={() => setSelectedOrder(ord)}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-border-subtle bg-bg-surface hover:border-brand-cyan/40 cursor-pointer transition-all gap-4"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border-[1.5px] border-border-subtle bg-bg-surface hover:border-brand-primary cursor-pointer transition-all shadow-neo gap-4"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-black text-txt-primary">
                       Order #{ord.orderId}
                     </span>
-                    <span className="text-xs font-semibold text-txt-secondary">
+                    <span className="text-xs font-bold text-txt-secondary">
                       • {ord.merchantName} ({ord.merchantVpa})
                     </span>
                   </div>
 
-                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-txt-muted">
+                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-txt-muted font-bold">
                     <span>{ord.tranches.length} Slices</span>
                     <span>•</span>
-                    <span className="text-status-success font-semibold">
+                    <span className="text-status-success font-black">
                       ₹{mdrSaved.toFixed(2)} MDR Saved
                     </span>
                     <span>•</span>
@@ -164,9 +168,9 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Micro progress bar */}
-                  <div className="mt-2.5 h-1.5 w-48 overflow-hidden rounded-full bg-bg-elevated">
+                  <div className="mt-2.5 h-1.5 w-48 border border-border-subtle bg-bg-elevated p-0.5">
                     <div
-                      className="h-full rounded-full bg-brand-cyan"
+                      className="h-full bg-brand-primary"
                       style={{ width: `${progress * 100}%` }}
                     />
                   </div>
@@ -179,11 +183,11 @@ export default function HistoryPage() {
                     </div>
                     <div className="mt-0.5">
                       {isPaid ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-status-success">
+                        <span className="inline-flex items-center gap-1 text-xs font-black text-status-success">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Fully Paid
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-status-warning">
+                        <span className="inline-flex items-center gap-1 text-xs font-black text-status-warning">
                           <Clock className="h-3.5 w-3.5" /> ₹{paidAmt.toFixed(0)} Paid
                         </span>
                       )}
@@ -194,11 +198,11 @@ export default function HistoryPage() {
                     <button
                       onClick={(e) => handleDelete(ord.orderId, e)}
                       title="Delete transaction record"
-                      className="p-2 rounded-xl text-txt-muted hover:text-status-error hover:bg-status-error/10 transition-all"
+                      className="p-2 border border-border-subtle bg-bg-elevated text-txt-muted hover:text-status-error hover:border-status-error transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                    <ArrowRight className="h-4 w-4 text-txt-muted group-hover:translate-x-1 group-hover:text-brand-cyan transition-all" />
+                    <ArrowRight className="h-4 w-4 text-txt-muted group-hover:translate-x-1 group-hover:text-brand-primary transition-all" />
                   </div>
                 </div>
               </div>

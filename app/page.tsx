@@ -46,6 +46,25 @@ export default function DashboardPage() {
   useEffect(() => {
     recalculateOrder(3850, 'kirana@okhdfcbank', 'Kirana Store', 'Counter Checkout');
     setRecentOrders(getSavedOrders());
+
+    const handleGlobalOrderCreated = (e: Event) => {
+      const customEvt = e as CustomEvent<SplitOrder>;
+      if (customEvt.detail) {
+        const order = customEvt.detail;
+        setCurrentOrder(order);
+        setBillAmount(order.totalAmount);
+        setMerchantVpa(order.merchantVpa);
+        setMerchantName(order.merchantName);
+        setSelectedPresetTitle('SCANNED INVOICE');
+        setIsModalOpen(true);
+        setRecentOrders(getSavedOrders());
+      }
+    };
+
+    window.addEventListener('splitupi:order_created', handleGlobalOrderCreated);
+    return () => {
+      window.removeEventListener('splitupi:order_created', handleGlobalOrderCreated);
+    };
   }, []);
 
   const recalculateOrder = (

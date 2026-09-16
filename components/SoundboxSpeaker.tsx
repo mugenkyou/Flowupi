@@ -29,12 +29,12 @@ export function SoundboxSpeaker({
 
   return (
     <div
-      className={`relative border-[1.5px] border-border-subtle bg-bg-surface p-5 sm:p-6 shadow-neo-violet ${className}`}
+      className={`relative border-[1.5px] border-border-subtle bg-bg-surface p-5 sm:p-6 shadow-neo ${className}`}
     >
       {/* Brand Header */}
       <div className="flex items-center justify-between border-b border-border-subtle pb-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center border border-brand-violet bg-brand-violet/20 text-brand-violet shadow-neo-sm">
+          <div className="flex h-9 w-9 items-center justify-center border border-brand-primary bg-brand-primary/20 text-brand-primary shadow-neo-sm">
             <Radio className="h-5 w-5 animate-pulse" />
           </div>
           <div>
@@ -59,13 +59,13 @@ export function SoundboxSpeaker({
               key={i}
               style={{ height: isPlaying ? `${Math.max(6, Math.min(32, h * (Math.random() + 0.5)))}px` : '10px' }}
               className={`w-2 transition-all duration-150 ${
-                isPlaying ? 'bg-brand-cyan shadow-neo-sm' : 'bg-border-subtle'
+                isPlaying ? 'bg-brand-primary shadow-neo-sm' : 'bg-border-subtle'
               }`}
             />
           ))}
         </div>
 
-        <Volume2 className={`h-6 w-6 ${isPlaying ? 'text-brand-cyan animate-bounce' : 'text-txt-muted'}`} />
+        <Volume2 className={`h-6 w-6 ${isPlaying ? 'text-brand-primary animate-bounce' : 'text-txt-muted'}`} />
       </div>
 
       {/* Controls Form */}
@@ -79,7 +79,7 @@ export function SoundboxSpeaker({
               type="number"
               value={amount}
               onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-              className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-sm font-black text-txt-primary focus:border-brand-violet focus:outline-none"
+              className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-sm font-black text-txt-primary focus:border-brand-primary focus:outline-none"
             />
           </div>
 
@@ -94,7 +94,7 @@ export function SoundboxSpeaker({
               step="0.05"
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-full accent-brand-violet mt-2"
+              className="w-full accent-brand-primary mt-2"
             />
           </div>
         </div>
@@ -103,7 +103,7 @@ export function SoundboxSpeaker({
         <NeoPopButton
           onClick={handleTestSound}
           disabled={isPlaying}
-          variant="violet"
+          variant="primary"
         >
           {isPlaying ? (
             <>

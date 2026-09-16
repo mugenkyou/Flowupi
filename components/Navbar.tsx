@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { SplitUpiLogo } from './SplitUpiLogo';
 import {
   QrCode,
@@ -11,7 +11,6 @@ import {
   Calculator,
   Volume2,
   History,
-  LayoutDashboard,
   Info,
   Shield,
   X,
@@ -26,6 +25,7 @@ interface NavbarProps {
 
 export function Navbar({ onOrderCreated }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
 
@@ -36,6 +36,18 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
     { href: '/soundbox', label: 'Soundbox', icon: Volume2 },
     { href: '/history', label: 'History', icon: History },
   ];
+
+  const handleGlobalOrderCreated = (order: SplitOrder) => {
+    if (onOrderCreated) {
+      onOrderCreated(order);
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('splitupi:order_created', { detail: order }));
+    }
+    if (pathname !== '/') {
+      router.push('/');
+    }
+  };
 
   return (
     <>
@@ -59,7 +71,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
                   href={item.href}
                   className={`flex items-center gap-2 border-[1.5px] px-3 py-2 text-xs font-black uppercase tracking-wider transition-all ${
                     isActive
-                      ? 'border-brand-cyan bg-brand-cyan/15 text-brand-cyan shadow-neo-sm'
+                      ? 'border-brand-primary bg-brand-primary/10 text-brand-primary shadow-neo-sm'
                       : 'border-transparent text-txt-secondary hover:border-border-subtle hover:text-txt-primary'
                   }`}
                 >
@@ -75,7 +87,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             <button
               onClick={() => setIsScannerOpen(true)}
               title="Scan Merchant QR"
-              className="flex items-center justify-center p-2 text-txt-primary hover:text-brand-cyan transition-colors"
+              className="flex items-center justify-center p-2 text-txt-primary hover:text-brand-primary transition-colors"
             >
               <QrCode className="h-5 w-5" />
             </button>
@@ -101,12 +113,12 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center gap-1 px-3 py-1 text-[10px] font-black uppercase tracking-wider transition-all ${
-                  isActive ? 'text-brand-cyan' : 'text-txt-secondary'
+                  isActive ? 'text-brand-primary' : 'text-txt-secondary'
                 }`}
               >
                 <div
                   className={`flex items-center justify-center rounded-full px-3 py-1 transition-all ${
-                    isActive ? 'bg-brand-cyan/25' : 'bg-transparent'
+                    isActive ? 'bg-brand-primary/20' : 'bg-transparent'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -123,7 +135,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
         <QRScannerModal
           isOpen={isScannerOpen}
           onClose={() => setIsScannerOpen(false)}
-          onOrderCreated={onOrderCreated}
+          onOrderCreated={handleGlobalOrderCreated}
         />
       )}
 

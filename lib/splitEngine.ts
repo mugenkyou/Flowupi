@@ -3,7 +3,14 @@ import { SplitOrder, Tranche, TrancheStatus } from './types';
 export const SAFE_TRANCHE_CAP = 1999.0;
 
 /**
- * Calculates randomized or fixed tranche amounts that sum exactly to totalAmount
+ * Rounding helper to avoid floating point precision artifacts (0.1 + 0.2 = 0.30000000000000004)
+ */
+function roundToTwoDecimals(num: number): number {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * Calculates tranche amounts that sum EXACTLY to totalAmount
  * with each tranche <= maxTranche.
  */
 export function calculateTrancheAmounts(
@@ -11,21 +18,22 @@ export function calculateTrancheAmounts(
   maxTranche: number = SAFE_TRANCHE_CAP,
   randomize: boolean = true
 ): number[] {
-  if (totalAmount <= 0) return [];
-  if (totalAmount <= maxTranche) return [Number(totalAmount.toFixed(2))];
+  const roundedTotal = roundToTwoDecimals(Math.max(0, totalAmount));
+  if (roundedTotal <= 0) return [];
+  if (roundedTotal <= maxTranche) return [roundedTotal];
 
-  const trancheCount = Math.ceil(totalAmount / maxTranche);
+  const trancheCount = Math.ceil(roundedTotal / maxTranche);
   const amounts: number[] = [];
-  let remaining = totalAmount;
+  let remaining = roundedTotal;
 
   if (!randomize || trancheCount <= 1) {
     for (let i = 0; i < trancheCount; i++) {
       if (i === trancheCount - 1) {
-        amounts.push(Number(remaining.toFixed(2)));
+        amounts.push(roundToTwoDecimals(remaining));
       } else {
-        const amt = Math.min(maxTranche, remaining);
-        amounts.push(Number(amt.toFixed(2)));
-        remaining -= amt;
+        const amt = roundToTwoDecimals(Math.min(maxTranche, remaining));
+        amounts.push(amt);
+        remaining = roundToTwoDecimals(remaining - amt);
       }
     }
     return amounts;
@@ -41,7 +49,7 @@ export function calculateTrancheAmounts(
     if (maxAllowed <= minAllowed) {
       picked = minAllowed;
     } else {
-      const isWhole = totalAmount % 1 === 0;
+      const isWhole = roundedTotal % 1 === 0;
       const spread = maxAllowed - minAllowed;
 
       if (isWhole && spread >= 10) {
@@ -54,31 +62,28 @@ export function calculateTrancheAmounts(
         }
       } else {
         picked = minAllowed + Math.random() * (maxAllowed - minAllowed);
-        picked = Math.round(picked * 100) / 100.0;
       }
     }
 
-    const roundedPicked = Number(picked.toFixed(2));
+    const roundedPicked = roundToTwoDecimals(picked);
     amounts.push(roundedPicked);
-    remaining -= roundedPicked;
-    remaining = Number(remaining.toFixed(2));
+    remaining = roundToTwoDecimals(remaining - roundedPicked);
   }
 
-  // Last tranche gets exact remaining amount
-  amounts.push(Number(remaining.toFixed(2)));
+  // Last tranche gets exact remaining amount to guarantee exact sum
+  amounts.push(roundToTwoDecimals(remaining));
 
-  // Fallback sanity check: if any tranche violated bounds, use balanced split
+  // Sanity check: if any tranche violated bounds or returned <= 0, fallback to balanced split
   if (amounts.some((a) => a > maxTranche || a <= 0)) {
     amounts.length = 0;
-    remaining = totalAmount;
-    const base = totalAmount / trancheCount;
+    remaining = roundedTotal;
+    const base = roundToTwoDecimals(roundedTotal / trancheCount);
     for (let i = 0; i < trancheCount; i++) {
       if (i === trancheCount - 1) {
-        amounts.push(Number(remaining.toFixed(2)));
+        amounts.push(roundToTwoDecimals(remaining));
       } else {
-        const amt = Number(base.toFixed(2));
-        amounts.push(amt);
-        remaining -= amt;
+        amounts.push(base);
+        remaining = roundToTwoDecimals(remaining - base);
       }
     }
   }
@@ -97,15 +102,16 @@ export function buildUpiUri(params: {
   txnRef?: string;
 }): string {
   const queryParams: string[] = [];
-  queryParams.push(`pa=${encodeURIComponent(params.vpa.trim())}`);
-  if (params.name.trim()) {
-    queryParams.push(`pn=${encodeURIComponent(params.name.trim())}`);
-  }
+  const cleanVpa = params.vpa.trim() || 'merchant@upi';
+  const cleanName = params.name.trim() || 'Merchant';
+  const cleanNote = params.note.trim() || 'SplitUPI Checkout';
+
+  queryParams.push(`pa=${encodeURIComponent(cleanVpa)}`);
+  queryParams.push(`pn=${encodeURIComponent(cleanName)}`);
   queryParams.push(`am=${params.amount.toFixed(2)}`);
   queryParams.push('cu=INR');
-  if (params.note.trim()) {
-    queryParams.push(`tn=${encodeURIComponent(params.note.trim())}`);
-  }
+  queryParams.push(`tn=${encodeURIComponent(cleanNote)}`);
+
   if (params.txnRef && params.txnRef.trim()) {
     queryParams.push(`tr=${encodeURIComponent(params.txnRef.trim())}`);
   }
@@ -123,7 +129,7 @@ export function parseUpiUri(rawData: string): {
   tn: string;
   tr: string;
 } {
-  let clean = rawData.trim();
+  let clean = (rawData || '').trim();
   const result = { pa: '', pn: '', am: '', tn: '', tr: '' };
   if (!clean) return result;
 
@@ -135,28 +141,28 @@ export function parseUpiUri(rawData: string): {
     const url = new URL(clean);
     url.searchParams.forEach((val, key) => {
       const k = key.toLowerCase();
-      if (k === 'pa') result.pa = val;
-      if (k === 'pn') result.pn = val;
-      if (k === 'am') result.am = val;
-      if (k === 'tn') result.tn = val;
-      if (k === 'tr') result.tr = val;
+      if (k === 'pa') result.pa = val.trim();
+      if (k === 'pn') result.pn = val.trim();
+      if (k === 'am') result.am = val.trim();
+      if (k === 'tn') result.tn = val.trim();
+      if (k === 'tr') result.tr = val.trim();
     });
   } catch (_) {
     // Regex fallback
     const paMatch = clean.match(/[?&]pa=([^&]+)/i);
-    if (paMatch) result.pa = decodeURIComponent(paMatch[1]);
+    if (paMatch) result.pa = decodeURIComponent(paMatch[1]).trim();
 
     const pnMatch = clean.match(/[?&]pn=([^&]+)/i);
-    if (pnMatch) result.pn = decodeURIComponent(pnMatch[1]);
+    if (pnMatch) result.pn = decodeURIComponent(pnMatch[1]).trim();
 
     const amMatch = clean.match(/[?&]am=([^&]+)/i);
-    if (amMatch) result.am = amMatch[1];
+    if (amMatch) result.am = amMatch[1].trim();
 
     const tnMatch = clean.match(/[?&]tn=([^&]+)/i);
-    if (tnMatch) result.tn = decodeURIComponent(tnMatch[1]);
+    if (tnMatch) result.tn = decodeURIComponent(tnMatch[1]).trim();
 
     const trMatch = clean.match(/[?&]tr=([^&]+)/i);
-    if (trMatch) result.tr = decodeURIComponent(trMatch[1]);
+    if (trMatch) result.tr = decodeURIComponent(trMatch[1]).trim();
   }
 
   // Fallback: Direct VPA string
