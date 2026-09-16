@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   QrCode,
   Upload,
@@ -12,44 +12,33 @@ import {
   RotateCcw,
   CheckCircle2,
   Edit3,
-  Flashlight,
-  ShieldCheck,
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { parseUpiUri, createTrancheOrder } from '../lib/splitEngine';
 import { SplitOrder } from '../lib/types';
 import { saveOrder } from '../lib/storage';
-import { ScannedPayload } from '../components/QRScannerModal';
+import { QRScannerModal, ScannedPayload } from '../components/QRScannerModal';
 import { SplitCheckoutModal } from '../components/SplitCheckoutModal';
 import { NeoPopBadge, NeoPopButton } from '../components/NeoPopComponents';
 
 export default function HomePage() {
-  // Camera & Scanner States
-  const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
-  const [isStartingCamera, setIsStartingCamera] = useState<boolean>(false);
-  const [cameraError, setCameraError] = useState<string>('');
-  const [hasTorch, setHasTorch] = useState<boolean>(false);
-  const [isTorchOn, setIsTorchOn] = useState<boolean>(false);
-
-  // General error alert
+  const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [pastedUri, setPastedUri] = useState<string>('');
 
   // Payment context for decoded QR payload
   const [paymentContext, setPaymentContext] = useState<ScannedPayload | null>(null);
+
+  // Amount input state (starts empty if no amount in QR, or pre-filled if present in QR)
   const [amountInput, setAmountInput] = useState<string>('');
 
   // Active generated order for checkout modal
   const [activeOrder, setActiveOrder] = useState<SplitOrder | null>(null);
 
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-
-  // Listen for global custom events
   useEffect(() => {
     const handleQrScannedEvent = (e: Event) => {
       const customEvt = e as CustomEvent<ScannedPayload>;
       if (customEvt.detail) {
-        stopCamera();
         setPaymentContext(customEvt.detail);
         setAmountInput(customEvt.detail.qrAmount ? String(customEvt.detail.qrAmount) : '');
       }
@@ -60,97 +49,21 @@ export default function HomePage() {
     return () => {
       window.removeEventListener('flowupi:qr_scanned', handleQrScannedEvent);
       window.removeEventListener('splitupi:qr_scanned', handleQrScannedEvent);
-      stopCamera();
     };
   }, []);
-
-  // Initialize live camera on mount if not in payment context
-  useEffect(() => {
-    if (!paymentContext && !isCameraActive && !isStartingCamera && !cameraError) {
-      startCamera();
-    }
-  }, [paymentContext]);
-
-  const startCamera = async () => {
-    try {
-      setCameraError('');
-      setErrorMsg('');
-      setIsStartingCamera(true);
-
-      const html5QrCode = new Html5Qrcode('home-camera-viewport');
-      scannerRef.current = html5QrCode;
-
-      await html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 15, qrbox: { width: 230, height: 230 } },
-        (decodedText) => {
-          processDecodedResult(decodedText);
-        },
-        () => {}
-      );
-
-      setIsCameraActive(true);
-      setIsStartingCamera(false);
-
-      // Check if torch track constraint is supported
-      try {
-        // @ts-ignore
-        const videoTrack = html5QrCode.getRunningTrack?.();
-        if (videoTrack) {
-          // @ts-ignore
-          const capabilities = videoTrack.getCapabilities?.() || {};
-          setHasTorch(!!capabilities.torch);
-        }
-      } catch (_) {}
-    } catch (err: unknown) {
-      setIsStartingCamera(false);
-      setIsCameraActive(false);
-      setCameraError('Camera access unavailable. You can import a QR image instead.');
-    }
-  };
-
-  const stopCamera = async () => {
-    if (scannerRef.current) {
-      try {
-        if (scannerRef.current.isScanning) {
-          await scannerRef.current.stop();
-        }
-        scannerRef.current.clear();
-      } catch (_) {}
-      scannerRef.current = null;
-    }
-    setIsCameraActive(false);
-    setIsTorchOn(false);
-  };
-
-  const toggleTorch = async () => {
-    if (scannerRef.current && hasTorch) {
-      try {
-        // @ts-ignore
-        const videoTrack = scannerRef.current.getRunningTrack?.();
-        if (videoTrack) {
-          const nextState = !isTorchOn;
-          // @ts-ignore
-          await videoTrack.applyConstraints({ advanced: [{ torch: nextState }] });
-          setIsTorchOn(nextState);
-        }
-      } catch (_) {}
-    }
-  };
 
   const processDecodedResult = (rawData: string) => {
     setErrorMsg('');
     const parsed = parseUpiUri(rawData);
 
     if (!parsed.pa) {
-      setErrorMsg('INVALID UPI QR: Code does not contain a valid merchant UPI VPA.');
+      setErrorMsg('INVALID UPI QR: Scanned code does not contain a valid merchant UPI VPA.');
       return;
     }
 
-    const qrAmt =
-      parsed.am && !isNaN(parseFloat(parsed.am)) && parseFloat(parsed.am) > 0
-        ? parseFloat(parsed.am)
-        : undefined;
+    const qrAmt = parsed.am && !isNaN(parseFloat(parsed.am)) && parseFloat(parsed.am) > 0
+      ? parseFloat(parsed.am)
+      : undefined;
 
     const payload: ScannedPayload = {
       pa: parsed.pa,
@@ -159,7 +72,6 @@ export default function HomePage() {
       qrAmount: qrAmt,
     };
 
-    stopCamera();
     setPaymentContext(payload);
     setAmountInput(qrAmt ? String(qrAmt) : '');
   };
@@ -189,7 +101,7 @@ export default function HomePage() {
     if (!paymentContext) return;
 
     const numAmount = parseFloat(amountInput);
-    if (isNaN(numAmount) || numAmount <= 0 || !isFinite(numAmount)) {
+    if (isNaN(numAmount) || numAmount <= 0) {
       setErrorMsg('ENTER A VALID AMOUNT: Please enter a payment amount greater than ₹0.');
       return;
     }
@@ -206,58 +118,46 @@ export default function HomePage() {
   };
 
   const parsedAmountNum = parseFloat(amountInput);
-  const isAmountValid =
-    !isNaN(parsedAmountNum) && isFinite(parsedAmountNum) && parsedAmountNum > 0;
+  const isAmountValid = !isNaN(parsedAmountNum) && isFinite(parsedAmountNum) && parsedAmountNum > 0;
 
   return (
-    <div className="space-y-6 max-w-xl mx-auto pb-8">
-      {/* Hidden file reader element */}
+    <div className="space-y-8 max-w-4xl mx-auto">
+      {/* Hidden container for image decoding */}
       <div id="home-file-reader" className="hidden" />
 
       {/* Header Banner */}
-      <div className="border-b border-border-subtle pb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-2">
-            <NeoPopBadge label="FAST UPI UTILITY" variant="primary" />
-            <NeoPopBadge label="0% MDR" variant="success" />
-          </div>
-          <span className="text-[10px] font-black text-txt-muted uppercase tracking-wider">
-            FlowUPI v1.0
-          </span>
+      <div className="border-b border-border-subtle pb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <NeoPopBadge label="INSTANT SCAN & PAY" variant="primary" />
+          <NeoPopBadge label="0% MDR COMPLIANT" variant="success" />
         </div>
-        <h1 className="text-xl sm:text-2xl font-black text-txt-primary tracking-tight">
-          {paymentContext ? 'Confirm Payment Details' : 'Scan UPI QR'}
+        <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
+          Scan & Pay Merchant UPI QR
         </h1>
-        <p className="text-xs font-bold text-txt-secondary mt-0.5">
-          {paymentContext
-            ? 'Review merchant details & enter total invoice bill amount.'
-            : 'Point your camera at any UPI counter standee code.'}
+        <p className="text-xs font-bold text-txt-secondary mt-1 max-w-xl">
+          FlowUPI • Fast, local-first UPI payment utility. Scan counter QR codes or import payment screenshots to initiate sub-₹2,000 micro-tranche surcharge-free checkout.
         </p>
       </div>
 
-      {/* Global Error Banner */}
+      {/* Error Alert Box */}
       {errorMsg && (
         <div className="border-[1.5px] border-status-error bg-status-error/10 p-4 shadow-neo-error space-y-3">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-status-error flex-shrink-0 mt-0.5" />
-            <span className="text-xs font-black text-status-error uppercase tracking-wider">
-              {errorMsg}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-status-error uppercase tracking-wider flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" /> {errorMsg}
             </span>
           </div>
-          <button
-            onClick={() => setErrorMsg('')}
-            className="text-[10px] font-black uppercase text-txt-primary border border-border-subtle px-3 py-1 bg-bg-elevated hover:border-brand-primary"
-          >
-            DISMISS
-          </button>
+          <NeoPopButton onClick={() => setErrorMsg('')} variant="surface" fullWidth={false}>
+            <RotateCcw className="h-4 w-4" /> DISMISS
+          </NeoPopButton>
         </div>
       )}
 
-      {/* STEP 2: PAYMENT DETAILS SCREEN */}
+      {/* STEP 2: DEDICATED PAYMENT DETAILS VIEW (No Popup, Full Focus) */}
       {paymentContext ? (
-        <div className="border-[1.5px] border-brand-primary bg-bg-surface p-5 sm:p-7 shadow-neo-brand space-y-6">
-          {/* Top Bar Back Action */}
-          <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+        <div className="border-[1.5px] border-brand-primary bg-bg-surface p-6 sm:p-8 shadow-neo-brand space-y-6">
+          {/* Back button & Header */}
+          <div className="flex items-center justify-between border-b border-border-subtle pb-4">
             <button
               type="button"
               onClick={() => {
@@ -270,37 +170,34 @@ export default function HomePage() {
               <span>← BACK TO SCANNER</span>
             </button>
 
-            <NeoPopBadge label="PAYEE CONFIRMED" variant="primary" />
+            <NeoPopBadge label="PAYMENT DETAILS" variant="primary" />
           </div>
 
           {/* Payee Info Box */}
-          <div className="border-[1.5px] border-border-subtle bg-bg-elevated p-5 shadow-neo-sm space-y-3">
-            <span className="text-[10px] font-black uppercase tracking-wider text-txt-muted flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-status-success" /> Pay To Merchant
+          <div className="border-[1.5px] border-border-subtle bg-bg-elevated p-5 shadow-neo-sm space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-txt-muted">
+              Scanned Merchant Payee
             </span>
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center border-2 border-brand-primary bg-brand-primary/20 text-brand-primary font-black text-lg shadow-neo-sm">
-                {paymentContext.pn.charAt(0).toUpperCase()}
-              </div>
-              <div className="overflow-hidden">
-                <h3 className="text-lg font-black text-txt-primary tracking-tight truncate">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-xl font-black text-txt-primary tracking-tight">
                   {paymentContext.pn}
                 </h3>
-                <p className="text-xs font-bold text-brand-primary font-mono truncate mt-0.5">
+                <p className="text-xs font-bold text-brand-primary font-mono mt-0.5">
                   {paymentContext.pa}
                 </p>
               </div>
-            </div>
 
-            {paymentContext.note && (
-              <div className="text-[11px] font-bold text-txt-secondary bg-bg-surface px-3 py-1.5 border border-border-subtle">
-                Note: {paymentContext.note}
-              </div>
-            )}
+              {paymentContext.note && (
+                <div className="text-[11px] font-bold text-txt-secondary bg-bg-surface px-2.5 py-1 border border-border-subtle">
+                  Note: {paymentContext.note}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Amount Entry Workstation */}
-          <form onSubmit={handleProceedToSplit} className="space-y-5">
+          <form onSubmit={handleProceedToSplit} className="space-y-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-black uppercase tracking-wider text-txt-primary">
@@ -308,11 +205,11 @@ export default function HomePage() {
                 </label>
                 {paymentContext.qrAmount ? (
                   <span className="text-[10px] font-black text-status-success uppercase tracking-wider flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> Pre-filled from QR
+                    <CheckCircle2 className="h-3 w-3" /> Pre-filled from QR (Editable)
                   </span>
                 ) : (
                   <span className="text-[10px] font-black text-brand-cyan uppercase tracking-wider flex items-center gap-1">
-                    <Edit3 className="h-3 w-3" /> Enter Total Amount
+                    <Edit3 className="h-3 w-3" /> Enter Amount to Pay
                   </span>
                 )}
               </div>
@@ -334,149 +231,116 @@ export default function HomePage() {
                 />
               </div>
               <p className="text-[11px] font-bold text-txt-muted">
-                Total amount will be tranches into sub-₹2,000 MDR-free slices.
+                Enter the total invoice bill amount to tranche into sub-₹2,000 MDR-free slices.
               </p>
             </div>
 
-            {/* Primary Action Button */}
+            {/* Submit Button */}
             <NeoPopButton
               type="submit"
               disabled={!isAmountValid}
-              variant={isAmountValid ? 'primary' : 'surface'}
+              variant={isAmountValid ? "primary" : "surface"}
             >
               {isAmountValid ? (
                 <>
-                  <Zap className="h-4 w-4" /> CONTINUE TO SPLIT BILL (₹{parsedAmountNum.toLocaleString('en-IN')})
+                  <Zap className="h-5 w-5" /> CONTINUE TO SPLIT BILL (₹{parsedAmountNum.toLocaleString('en-IN')})
                 </>
               ) : (
                 <>
-                  <AlertCircle className="h-4 w-4 text-status-error" /> ENTER VALID AMOUNT TO CONTINUE
+                  <AlertCircle className="h-5 w-5 text-status-error" /> ENTER A VALID AMOUNT TO CONTINUE
                 </>
               )}
             </NeoPopButton>
           </form>
         </div>
       ) : (
-        /* STEP 1: MOBILE-FIRST REDESIGNED SCANNER WORKSTATION */
-        <div className="space-y-5">
-          {/* Main Camera Viewport Box */}
-          <div className="relative border-[1.5px] border-border-subtle bg-bg-surface overflow-hidden shadow-neo">
-            {/* Viewport Frame Box */}
-            <div className="relative w-full aspect-square max-h-[380px] bg-black flex flex-col items-center justify-center overflow-hidden">
-              {/* HTML5 QR Camera Target */}
-              <div
-                id="home-camera-viewport"
-                className="w-full h-full object-cover"
-              />
-
-              {/* Corner Bracket Overlays (╭─ ─╮) */}
-              <div className="absolute inset-0 pointer-events-none p-8 sm:p-12 flex flex-col justify-between">
-                <div className="flex justify-between">
-                  <div className="w-10 h-10 border-t-4 border-l-4 border-brand-cyan shadow-neo-sm" />
-                  <div className="w-10 h-10 border-t-4 border-r-4 border-brand-cyan shadow-neo-sm" />
-                </div>
-                <div className="flex justify-between">
-                  <div className="w-10 h-10 border-b-4 border-l-4 border-brand-cyan shadow-neo-sm" />
-                  <div className="w-10 h-10 border-b-4 border-r-4 border-brand-cyan shadow-neo-sm" />
-                </div>
-              </div>
-
-              {/* Moving Scan Line Animation Overlay */}
-              {isCameraActive && (
-                <div className="absolute inset-x-8 top-1/4 h-0.5 bg-gradient-to-r from-transparent via-brand-cyan to-transparent animate-pulse shadow-neo-cyan" />
-              )}
-
-              {/* Loading / Starting Camera State */}
-              {isStartingCamera && (
-                <div className="absolute inset-0 bg-bg/90 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 p-4">
-                  <div className="flex h-10 w-10 items-center justify-center border-2 border-brand-cyan bg-brand-cyan/20 text-brand-cyan animate-spin">
-                    <QrCode className="h-5 w-5" />
-                  </div>
-                  <span className="text-xs font-black uppercase tracking-wider text-txt-primary">
-                    Starting Camera Feed…
+        /* STEP 1: SCANNER & IMPORT ENTRY WORKSTATION */
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Option 1: Live Camera Scan */}
+            <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-brand-primary">
+                    PRIMARY ENTRY
                   </span>
+                  <NeoPopBadge label="CAMERA" variant="primary" />
                 </div>
-              )}
 
-              {/* Camera Error / Unavailable State */}
-              {cameraError && (
-                <div className="absolute inset-0 bg-bg/95 p-6 flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="flex h-12 w-12 items-center justify-center border-2 border-status-error bg-status-error/15 text-status-error">
-                    <AlertCircle className="h-6 w-6" />
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex h-12 w-12 items-center justify-center border-[1.5px] border-brand-primary bg-brand-primary/10 text-brand-primary shadow-neo-sm">
+                    <QrCode className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black uppercase text-txt-primary">
-                      Camera Access Unavailable
+                    <h3 className="text-base font-black text-txt-primary uppercase tracking-tight">
+                      Scan With Camera
                     </h3>
-                    <p className="text-xs font-bold text-txt-secondary mt-1 max-w-xs">
-                      {cameraError}
+                    <p className="text-xs font-bold text-txt-secondary">
+                      Point device camera at any physical QR counter code
                     </p>
                   </div>
-                  <label className="cursor-pointer block">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    <NeoPopButton variant="primary" fullWidth={false}>
-                      <Upload className="h-4 w-4" /> IMPORT QR IMAGE
-                    </NeoPopButton>
-                  </label>
                 </div>
-              )}
+
+                <p className="text-xs text-txt-muted leading-relaxed">
+                  Supports GPay, PhonePe, Paytm, BHIM, and all NPCI BharatQR physical standees and printed invoices.
+                </p>
+              </div>
+
+              <NeoPopButton
+                onClick={() => setIsCameraOpen(true)}
+                variant="primary"
+              >
+                <Camera className="h-4 w-4" /> SCAN WITH CAMERA
+              </NeoPopButton>
             </div>
 
-            {/* Viewport Control Bar Below Camera */}
-            <div className="flex items-center justify-between border-t border-border-subtle bg-bg-elevated px-4 py-3">
-              <span className="text-[11px] font-black uppercase tracking-wider text-txt-secondary flex items-center gap-1.5">
-                <Camera className="h-3.5 w-3.5 text-brand-cyan" /> Point Camera at QR
-              </span>
+            {/* Option 2: Import Screenshot / Image */}
+            <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary">
+                    SECONDARY ENTRY
+                  </span>
+                  <NeoPopBadge label="SCREENSHOT" variant="secondary" />
+                </div>
 
-              {/* Torch Trigger */}
-              {hasTorch && isCameraActive && (
-                <button
-                  onClick={toggleTorch}
-                  className={`flex items-center gap-1.5 border px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all ${
-                    isTorchOn
-                      ? 'border-status-warning bg-status-warning/20 text-status-warning'
-                      : 'border-border-subtle bg-bg-surface text-txt-secondary hover:text-txt-primary'
-                  }`}
-                >
-                  <Flashlight className="h-3.5 w-3.5" />
-                  <span>Torch {isTorchOn ? 'ON' : 'OFF'}</span>
-                </button>
-              )}
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex h-12 w-12 items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated text-txt-primary shadow-neo-sm">
+                    <Upload className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-txt-primary uppercase tracking-tight">
+                      Import QR Image
+                    </h3>
+                    <p className="text-xs font-bold text-txt-secondary">
+                      Upload screenshot or image file from your device
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-txt-muted leading-relaxed">
+                  Supports PNG, JPG, JPEG, and WebP payment QR screenshots saved in your gallery or files.
+                </p>
+              </div>
+
+              <label className="cursor-pointer block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <NeoPopButton variant="secondary">
+                  <Upload className="h-4 w-4" /> IMPORT QR SCREENSHOT
+                </NeoPopButton>
+              </label>
             </div>
           </div>
 
-          {/* First-Class Fallbacks: Import Image & Paste Intent Link */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Import QR Screenshot */}
-            <label className="cursor-pointer block">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <NeoPopButton variant="secondary">
-                <Upload className="h-4 w-4" /> IMPORT QR SCREENSHOT
-              </NeoPopButton>
-            </label>
-
-            {/* Restart Camera */}
-            {!isCameraActive && !isStartingCamera && (
-              <NeoPopButton onClick={startCamera} variant="surface">
-                <RotateCcw className="h-4 w-4" /> RESTART CAMERA
-              </NeoPopButton>
-            )}
-          </div>
-
-          {/* Paste Raw UPI URI Box */}
-          <div className="border-[1.5px] border-border-subtle bg-bg-surface p-4 shadow-neo space-y-3">
+          {/* Option 3: Manual UPI URI Paste Box */}
+          <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-3">
             <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-brand-cyan" /> Or Paste Raw UPI Payment Link
+              <Zap className="h-3.5 w-3.5 text-brand-primary" /> Or Paste Raw UPI Intent Link Directly
             </span>
 
             <form onSubmit={handlePasteSubmit} className="space-y-3">
@@ -489,20 +353,28 @@ export default function HomePage() {
               />
 
               <NeoPopButton type="submit" variant="surface">
-                <span>PARSE UPI INTENT LINK</span>
+                <span>PARSE & PROCESS UPI LINK</span>
                 <ArrowRight className="h-4 w-4" />
               </NeoPopButton>
             </form>
           </div>
-
-          {/* Scanner Helper Footer */}
-          <p className="text-[11px] font-bold text-center text-txt-muted">
-            Works with all NPCI BharatQR, GPay, PhonePe, Paytm, and BHIM merchant codes.
-          </p>
-        </div>
+        </>
       )}
 
-      {/* Step-by-Step Tranche Checkout Modal */}
+      {/* Camera Scanner Modal */}
+      {isCameraOpen && (
+        <QRScannerModal
+          isOpen={isCameraOpen}
+          onClose={() => setIsCameraOpen(false)}
+          onScannedPayload={(payload) => {
+            setIsCameraOpen(false);
+            setPaymentContext(payload);
+            setAmountInput(payload.qrAmount ? String(payload.qrAmount) : '');
+          }}
+        />
+      )}
+
+      {/* Step-by-Step Checkout Modal */}
       {activeOrder && (
         <SplitCheckoutModal
           order={activeOrder}
@@ -513,4 +385,3 @@ export default function HomePage() {
     </div>
   );
 }
-
