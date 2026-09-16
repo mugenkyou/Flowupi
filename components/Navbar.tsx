@@ -30,7 +30,8 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
 
   const navItems = [
-    { href: '/', label: 'POS Split', icon: Store },
+    { href: '/', label: 'Scan / Pay', icon: QrCode },
+    { href: '/pos', label: 'POS Split', icon: Store },
     { href: '/group', label: 'Group Split', icon: Users },
     { href: '/calculator', label: 'MDR Roast', icon: Calculator },
     { href: '/soundbox', label: 'Soundbox', icon: Volume2 },
@@ -145,7 +146,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
           <div className="relative w-full max-w-md border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-4">
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-brand-cyan" />
+                <Shield className="h-5 w-5 text-brand-primary" />
                 <h3 className="text-base font-extrabold text-txt-primary">
                   The 0% MDR Arbitrage
                 </h3>

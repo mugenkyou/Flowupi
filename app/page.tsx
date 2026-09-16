@@ -1,358 +1,352 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import {
-  Zap,
-  ShieldCheck,
   QrCode,
-  Volume2,
-  Layers,
-  ArrowRight,
-  Trash2,
+  Upload,
+  Camera,
+  AlertCircle,
   CheckCircle2,
-  Clock,
+  ShieldCheck,
+  Zap,
+  ArrowRight,
+  RotateCcw,
+  Store,
 } from 'lucide-react';
-import { createTrancheOrder, calcMdrSavings } from '../lib/splitEngine';
+import { Html5Qrcode } from 'html5-qrcode';
+import { parseUpiUri, createTrancheOrder } from '../lib/splitEngine';
 import { SplitOrder } from '../lib/types';
-import { getSavedOrders, saveOrder, clearHistory } from '../lib/storage';
+import { saveOrder } from '../lib/storage';
+import { QRScannerModal } from '../components/QRScannerModal';
 import { SplitCheckoutModal } from '../components/SplitCheckoutModal';
-import { TrancheCard } from '../components/TrancheCard';
-import { playSoundboxConfirmation } from '../lib/soundbox';
-import { NeoPopBadge, NeoPopButton, NeoPopCard } from '../components/NeoPopComponents';
+import { NeoPopBadge, NeoPopButton } from '../components/NeoPopComponents';
 
-interface KiranaPreset {
-  title: string;
-  amount: number;
-}
+export default function HomePage() {
+  const [isCameraOpen, setIsCameraOpen] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [pastedUri, setPastedUri] = useState<string>('');
 
-const kiranaPresets: KiranaPreset[] = [
-  { title: 'ATTA & OIL', amount: 2450 },
-  { title: 'DAIRY & GHEE', amount: 3200 },
-  { title: 'DHABA DINNER', amount: 3850 },
-  { title: 'DRY FRUITS', amount: 4500 },
-  { title: 'FULL RATION', amount: 7500 },
-];
+  // Pending parsed payload if amount is missing
+  const [pendingParsedData, setPendingParsedData] = useState<{
+    pa: string;
+    pn: string;
+    note: string;
+  } | null>(null);
+  const [customAmount, setCustomAmount] = useState<number>(3850);
 
-export default function DashboardPage() {
-  const [billAmount, setBillAmount] = useState<number>(3850);
-  const [merchantVpa, setMerchantVpa] = useState<string>('kirana@okhdfcbank');
-  const [merchantName, setMerchantName] = useState<string>('Kirana Store');
-  const [note, setNote] = useState<string>('Counter Checkout');
-  const [selectedPresetTitle, setSelectedPresetTitle] = useState<string>('DHABA DINNER');
-  const [currentOrder, setCurrentOrder] = useState<SplitOrder | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [recentOrders, setRecentOrders] = useState<SplitOrder[]>([]);
+  // Active generated order for checkout
+  const [activeOrder, setActiveOrder] = useState<SplitOrder | null>(null);
 
-  useEffect(() => {
-    recalculateOrder(3850, 'kirana@okhdfcbank', 'Kirana Store', 'Counter Checkout');
-    setRecentOrders(getSavedOrders());
+  const processDecodedResult = (rawData: string) => {
+    setErrorMsg('');
+    const parsed = parseUpiUri(rawData);
 
-    const handleGlobalOrderCreated = (e: Event) => {
-      const customEvt = e as CustomEvent<SplitOrder>;
-      if (customEvt.detail) {
-        const order = customEvt.detail;
-        setCurrentOrder(order);
-        setBillAmount(order.totalAmount);
-        setMerchantVpa(order.merchantVpa);
-        setMerchantName(order.merchantName);
-        setSelectedPresetTitle('SCANNED INVOICE');
-        setIsModalOpen(true);
-        setRecentOrders(getSavedOrders());
-      }
-    };
+    if (!parsed.pa) {
+      setErrorMsg('INVALID UPI QR: The scanned image or code does not contain a valid merchant UPI VPA.');
+      return;
+    }
 
-    window.addEventListener('splitupi:order_created', handleGlobalOrderCreated);
-    return () => {
-      window.removeEventListener('splitupi:order_created', handleGlobalOrderCreated);
-    };
-  }, []);
+    const amt = parsed.am ? parseFloat(parsed.am) : 0;
 
-  const recalculateOrder = (
-    amt: number,
-    vpa: string,
-    name: string,
-    nt: string
-  ) => {
-    if (amt <= 0) return;
+    if (amt > 0) {
+      // Valid QR with amount -> create tranche order & launch checkout immediately
+      const order = createTrancheOrder({
+        totalAmount: amt,
+        merchantVpa: parsed.pa,
+        merchantName: parsed.pn || 'Merchant',
+        note: parsed.tn || 'Scan & Pay Checkout',
+      });
+      saveOrder(order);
+      setActiveOrder(order);
+      setPendingParsedData(null);
+    } else {
+      // Valid QR without amount -> prompt user for invoice total
+      setPendingParsedData({
+        pa: parsed.pa,
+        pn: parsed.pn || 'Merchant',
+        note: parsed.tn || 'Scan & Pay Checkout',
+      });
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setErrorMsg('');
+      const html5QrCode = new Html5Qrcode('home-file-reader');
+      const result = await html5QrCode.scanFile(file, true);
+      processDecodedResult(result);
+    } catch (_) {
+      setErrorMsg('COULD NOT DECODE QR: Unable to detect a valid UPI QR code in the uploaded image file.');
+    }
+  };
+
+  const handleCreatePendingOrder = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!pendingParsedData || customAmount <= 0) return;
+
     const order = createTrancheOrder({
-      totalAmount: amt,
-      merchantVpa: vpa || 'merchant@upi',
-      merchantName: name || 'Merchant',
-      note: nt,
+      totalAmount: customAmount,
+      merchantVpa: pendingParsedData.pa,
+      merchantName: pendingParsedData.pn,
+      note: pendingParsedData.note,
     });
-    setCurrentOrder(order);
+
     saveOrder(order);
-    setRecentOrders(getSavedOrders());
+    setActiveOrder(order);
+    setPendingParsedData(null);
   };
 
-  const handlePresetSelect = (preset: KiranaPreset) => {
-    setSelectedPresetTitle(preset.title);
-    setBillAmount(preset.amount);
-    recalculateOrder(preset.amount, merchantVpa, merchantName, note);
+  const handlePasteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pastedUri.trim()) return;
+    processDecodedResult(pastedUri);
   };
-
-  const mdrSaved = calcMdrSavings(billAmount);
-  const trancheCount = Math.ceil(billAmount / 1999);
 
   return (
-    <div className="space-y-8">
-      {/* Hero Banner with 3D NeoPOP Styling matching Flutter POS Header */}
-      <section className="border-[1.5px] border-border-subtle bg-bg-surface p-6 sm:p-8 shadow-neo space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-subtle pb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <NeoPopBadge label="0% MDR TIER" variant="primary" />
-              <NeoPopBadge label="NPCI COMPLIANT" variant="success" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
-              POS Payment Micro-Tranching Engine
-            </h1>
-            <p className="text-xs font-bold text-txt-secondary mt-1 max-w-xl">
-              Simulate retail counter bill tranching into sub-₹2,000 slices for 100% MDR surcharge-free payment settlement.
-            </p>
-          </div>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      {/* Hidden container for image decoding */}
+      <div id="home-file-reader" className="hidden" />
 
-          {currentOrder && (
-            <NeoPopButton
-              onClick={() => setIsModalOpen(true)}
-              variant="primary"
-              fullWidth={false}
-            >
-              <QrCode className="h-4 w-4" />
-              <span>LAUNCH CHECKOUT MODAL</span>
-            </NeoPopButton>
-          )}
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <NeoPopBadge label="INSTANT SCAN & PAY" variant="primary" />
+            <NeoPopBadge label="0% MDR COMPLIANT" variant="success" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
+            Scan & Pay Merchant UPI QR
+          </h1>
+          <p className="text-xs font-bold text-txt-secondary mt-1 max-w-xl">
+            Scan counter QR codes or import payment screenshots to initiate sub-₹2,000 micro-tranche surcharge-free checkout.
+          </p>
         </div>
 
-        {/* Counter Register & Tranche Preview Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Register Inputs */}
-          <div className="lg:col-span-5 space-y-5">
-            {/* Presets Grid */}
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-2">
-                Quick Merchant Kirana Presets
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {kiranaPresets.map((preset) => {
-                  const isSelected = selectedPresetTitle === preset.title;
+        <Link href="/pos">
+          <NeoPopButton variant="secondary" fullWidth={false}>
+            <Store className="h-4 w-4" />
+            <span>POS COUNTER REGISTER</span>
+          </NeoPopButton>
+        </Link>
+      </div>
 
-                  return (
-                    <button
-                      key={preset.title}
-                      onClick={() => handlePresetSelect(preset)}
-                      className={`border-[1.5px] px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all duration-100 ${
-                        isSelected
-                          ? 'border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-neo-cyan'
-                          : 'border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary shadow-neo-sm'
-                      }`}
-                    >
-                      {preset.title} (₹{preset.amount})
-                    </button>
-                  );
-                })}
-              </div>
+      {/* Error Alert Box */}
+      {errorMsg && (
+        <div className="border-[1.5px] border-status-error bg-status-error/10 p-4 shadow-neo-error space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-status-error uppercase tracking-wider flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" /> {errorMsg}
+            </span>
+          </div>
+          <NeoPopButton onClick={() => setErrorMsg('')} variant="surface" fullWidth={false}>
+            <RotateCcw className="h-4 w-4" /> TRY AGAIN
+          </NeoPopButton>
+        </div>
+      )}
+
+      {/* Missing Amount Input Prompt */}
+      {pendingParsedData && (
+        <div className="border-[1.5px] border-brand-primary bg-bg-surface p-6 shadow-neo-brand space-y-4">
+          <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-brand-primary" />
+              <h3 className="text-sm font-black uppercase tracking-wider text-txt-primary">
+                Merchant Recognized: {pendingParsedData.pn}
+              </h3>
             </div>
+            <NeoPopBadge label={pendingParsedData.pa} variant="secondary" />
+          </div>
 
-            {/* Bill Amount Input */}
+          <form onSubmit={handleCreatePendingOrder} className="space-y-4">
             <div>
               <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
-                Total Invoice Amount (₹)
+                Enter Invoice Total Amount (₹)
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-2.5 text-lg font-black text-txt-muted">₹</span>
                 <input
                   type="number"
-                  value={billAmount}
-                  onChange={(e) => {
-                    const amt = parseFloat(e.target.value) || 0;
-                    setBillAmount(amt);
-                    setSelectedPresetTitle('CUSTOM BILL');
-                    recalculateOrder(amt, merchantVpa, merchantName, note);
-                  }}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated py-2.5 pl-8 pr-3 text-xl font-black text-txt-primary focus:border-brand-cyan focus:outline-none shadow-neo-sm"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(parseFloat(e.target.value) || 0)}
+                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated py-2.5 pl-8 pr-3 text-xl font-black text-txt-primary focus:border-brand-primary focus:outline-none shadow-neo-sm"
+                  required
+                  autoFocus
                 />
               </div>
             </div>
 
-            {/* Merchant Details Inputs */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
-                  Merchant Name
-                </label>
-                <input
-                  type="text"
-                  value={merchantName}
-                  onChange={(e) => {
-                    setMerchantName(e.target.value);
-                    recalculateOrder(billAmount, e.target.value, merchantVpa, note);
-                  }}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-cyan focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-wider text-txt-secondary mb-1">
-                  Merchant VPA / UPI ID
-                </label>
-                <input
-                  type="text"
-                  value={merchantVpa}
-                  onChange={(e) => {
-                    setMerchantVpa(e.target.value);
-                    recalculateOrder(billAmount, merchantName, e.target.value, note);
-                  }}
-                  className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-cyan focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* 0% MDR Guarantee Card */}
-            <div className="border-[1.5px] border-status-success bg-status-success/15 p-4 shadow-neo-success space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-status-success uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4" /> 0% MDR Guarantee
-                </span>
-                <NeoPopBadge label="SAFE TIER" variant="success" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-txt-muted uppercase">Standard Gateway Fee</span>
-                  <div className="text-base font-black text-status-error">
-                    ₹{((billAmount > 2000 ? billAmount * 0.004 : 0)).toFixed(2)}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[10px] font-bold text-txt-muted uppercase">SplitUPI MDR Fee</span>
-                  <div className="text-base font-black text-status-success">
-                    ₹0.00 (0%)
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <NeoPopButton
-              onClick={() => setIsModalOpen(true)}
-              variant="primary"
-            >
-              <Zap className="h-4 w-4" /> OPEN STEP-BY-STEP CHECKOUT
-            </NeoPopButton>
-          </div>
-
-          {/* Tranche Preview Panel matching QrTrancheCard list */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <h2 className="text-xs font-black uppercase tracking-wider text-txt-secondary flex items-center gap-2">
-                <Layers className="h-4 w-4 text-brand-cyan" /> Generated Sub-₹2,000 Slices ({trancheCount})
-              </h2>
-
-              <button
-                onClick={() => playSoundboxConfirmation(billAmount, merchantName)}
-                className="flex items-center gap-1.5 border border-brand-violet bg-brand-violet/15 px-2.5 py-1 text-xs font-black text-brand-violet hover:bg-brand-violet/25 shadow-neo-sm"
-              >
-                <Volume2 className="h-3.5 w-3.5" /> SOUNDBOX ALERT
-              </button>
-            </div>
-
-            {currentOrder && currentOrder.tranches.length > 0 && (
-              <div className="space-y-3">
-                {currentOrder.tranches.map((t, idx) => (
-                  <TrancheCard
-                    key={t.id}
-                    tranche={t}
-                    totalTranches={currentOrder.tranches.length}
-                    merchantName={merchantName}
-                    isCurrentActive={idx === 0}
-                    onStatusChange={(id, status) => {
-                      const updatedTranches = currentOrder.tranches.map((item) =>
-                        item.id === id ? { ...item, status } : item
-                      );
-                      const updatedOrder = { ...currentOrder, tranches: updatedTranches };
-                      setCurrentOrder(updatedOrder);
-                      saveOrder(updatedOrder);
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Recent Orders List */}
-      <section className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-4">
-        <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-          <h3 className="text-xs font-black uppercase tracking-wider text-txt-primary">
-            Recent SplitUPI Orders
-          </h3>
-          {recentOrders.length > 0 && (
-            <button
-              onClick={() => {
-                clearHistory();
-                setRecentOrders([]);
-              }}
-              className="flex items-center gap-1 text-xs font-bold text-status-error hover:underline"
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Clear History
-            </button>
-          )}
-        </div>
-
-        {recentOrders.length === 0 ? (
-          <div className="py-8 text-center text-xs font-bold text-txt-muted">
-            No recent transaction history logged.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {recentOrders.slice(0, 6).map((ord) => {
-              const isPaid = ord.tranches.every((t) => t.status === 'paid');
-              const mdrSaved = calcMdrSavings(ord.totalAmount);
-
-              return (
-                <div
-                  key={ord.orderId}
-                  onClick={() => {
-                    setCurrentOrder(ord);
-                    setIsModalOpen(true);
-                  }}
-                  className="border-[1.5px] border-border-subtle bg-bg-elevated p-4 shadow-neo-sm hover:border-brand-cyan cursor-pointer transition-all space-y-2"
+            <div className="flex flex-wrap gap-2">
+              {[1500, 2450, 3850, 6800, 12500].map((preset) => (
+                <button
+                  type="button"
+                  key={preset}
+                  onClick={() => setCustomAmount(preset)}
+                  className="border border-border-subtle bg-bg-elevated px-3 py-1.5 text-xs font-black text-txt-secondary hover:text-txt-primary shadow-neo-sm"
                 >
-                  <div className="flex items-center justify-between text-xs font-black">
-                    <span className="text-txt-primary">#{ord.orderId}</span>
-                    {isPaid ? (
-                      <NeoPopBadge label="PAID" variant="success" />
-                    ) : (
-                      <NeoPopBadge label="PENDING" variant="warning" />
-                    )}
-                  </div>
+                  ₹{preset.toLocaleString('en-IN')}
+                </button>
+              ))}
+            </div>
 
-                  <div className="text-xl font-black text-txt-primary">
-                    ₹{ord.totalAmount.toLocaleString('en-IN')}
-                  </div>
+            <NeoPopButton type="submit" variant="primary">
+              <Zap className="h-4 w-4" /> CONFIRM AMOUNT & TRANCHE BILL
+            </NeoPopButton>
+          </form>
+        </div>
+      )}
 
-                  <div className="flex items-center justify-between text-[10px] font-bold text-txt-muted border-t border-border-subtle pt-2">
-                    <span>{ord.tranches.length} Slices</span>
-                    <span className="text-status-success font-black">
-                      Saved ₹{mdrSaved.toFixed(2)} MDR
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+      {/* Main 2-Column Action Workstation */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Option 1: Live Camera Scan */}
+        <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo flex flex-col justify-between space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-brand-primary">
+                PRIMARY ENTRY
+              </span>
+              <NeoPopBadge label="CAMERA" variant="primary" />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <div className="flex h-12 w-12 items-center justify-center border-[1.5px] border-brand-primary bg-brand-primary/10 text-brand-primary shadow-neo-sm">
+                <QrCode className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-txt-primary uppercase tracking-tight">
+                  Scan With Camera
+                </h3>
+                <p className="text-xs font-bold text-txt-secondary">
+                  Point device camera at any physical QR counter code
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-txt-muted leading-relaxed">
+              Supports GPay, PhonePe, Paytm, BHIM, and all NPCI BharatQR physical standees and printed invoices.
+            </p>
           </div>
-        )}
-      </section>
 
-      {/* Split Checkout Modal */}
-      {currentOrder && isModalOpen && (
+          <NeoPopButton
+            onClick={() => setIsCameraOpen(true)}
+            variant="primary"
+          >
+            <Camera className="h-4 w-4" /> SCAN WITH CAMERA
+          </NeoPopButton>
+        </div>
+
+        {/* Option 2: Import Screenshot / Image */}
+        <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo flex flex-col justify-between space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary">
+                SECONDARY ENTRY
+              </span>
+              <NeoPopBadge label="SCREENSHOT" variant="secondary" />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <div className="flex h-12 w-12 items-center justify-center border-[1.5px] border-border-subtle bg-bg-elevated text-txt-primary shadow-neo-sm">
+                <Upload className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-txt-primary uppercase tracking-tight">
+                  Import QR Image
+                </h3>
+                <p className="text-xs font-bold text-txt-secondary">
+                  Upload screenshot or image file from your device
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-txt-muted leading-relaxed">
+              Supports PNG, JPG, JPEG, and WebP payment QR screenshots saved in your gallery or files.
+            </p>
+          </div>
+
+          <label className="cursor-pointer block">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <NeoPopButton variant="secondary">
+              <Upload className="h-4 w-4" /> IMPORT QR SCREENSHOT
+            </NeoPopButton>
+          </label>
+        </div>
+      </div>
+
+      {/* Side Feature Banner: POS Counter Register Mode */}
+      <div className="border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center border border-border-subtle bg-bg-elevated text-txt-primary shadow-neo-sm">
+              <Store className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wider text-txt-primary">
+                Side Feature: POS Counter Register Mode
+              </h3>
+              <p className="text-xs font-bold text-txt-secondary">
+                Enter custom bill amounts, set Kirana presets, and test sub-₹2,000 tranching without scanning.
+              </p>
+            </div>
+          </div>
+
+          <Link href="/pos">
+            <NeoPopButton variant="surface" fullWidth={false}>
+              <span>OPEN POS TERMINAL</span>
+              <ArrowRight className="h-4 w-4" />
+            </NeoPopButton>
+          </Link>
+        </div>
+
+        {/* Option 3: Manual UPI URI Paste Box */}
+        <div className="space-y-3 pt-2">
+          <span className="text-[10px] font-black uppercase tracking-wider text-txt-secondary flex items-center gap-1.5">
+            <Zap className="h-3.5 w-3.5 text-brand-primary" /> Or Paste Raw UPI Intent Link Directly
+          </span>
+
+          <form onSubmit={handlePasteSubmit} className="space-y-3">
+            <textarea
+              rows={2}
+              value={pastedUri}
+              onChange={(e) => setPastedUri(e.target.value)}
+              placeholder="upi://pay?pa=merchant@upi&pn=MerchantName&am=6800..."
+              className="w-full border border-border-subtle bg-bg-elevated p-3 text-xs text-txt-primary font-mono placeholder:text-txt-muted focus:border-brand-primary focus:outline-none"
+            />
+
+            <NeoPopButton type="submit" variant="surface">
+              <span>PARSE & PROCESS UPI LINK</span>
+              <ArrowRight className="h-4 w-4" />
+            </NeoPopButton>
+          </form>
+        </div>
+      </div>
+
+      {/* Camera Scanner Modal */}
+      {isCameraOpen && (
+        <QRScannerModal
+          isOpen={isCameraOpen}
+          onClose={() => setIsCameraOpen(false)}
+          onOrderCreated={(order) => {
+            setIsCameraOpen(false);
+            setActiveOrder(order);
+          }}
+        />
+      )}
+
+      {/* Step-by-Step Checkout Modal */}
+      {activeOrder && (
         <SplitCheckoutModal
-          order={currentOrder}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onOrderUpdated={(ord) => setCurrentOrder(ord)}
+          order={activeOrder}
+          isOpen={!!activeOrder}
+          onClose={() => setActiveOrder(null)}
         />
       )}
     </div>
