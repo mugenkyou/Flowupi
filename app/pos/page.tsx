@@ -197,8 +197,9 @@ export default function PosPage() {
                   type="text"
                   value={merchantName}
                   onChange={(e) => {
-                    setMerchantName(e.target.value);
-                    recalculateOrder(billAmount, e.target.value, merchantVpa, note);
+                    const newName = e.target.value;
+                    setMerchantName(newName);
+                    recalculateOrder(billAmount, merchantVpa, newName, note);
                   }}
                   className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
                 />
@@ -212,8 +213,9 @@ export default function PosPage() {
                   type="text"
                   value={merchantVpa}
                   onChange={(e) => {
-                    setMerchantVpa(e.target.value);
-                    recalculateOrder(billAmount, merchantName, e.target.value, note);
+                    const newVpa = e.target.value;
+                    setMerchantVpa(newVpa);
+                    recalculateOrder(billAmount, newVpa, merchantName, note);
                   }}
                   className="w-full border-[1.5px] border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-bold text-txt-primary focus:border-brand-primary focus:outline-none"
                 />

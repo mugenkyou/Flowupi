@@ -7,6 +7,7 @@ import {
   calcMdrStandard,
   calcMdrSavings,
 } from './splitEngine';
+import { importData, exportData } from './storage';
 
 export function runSplitEngineSanityTests() {
   const results: { test: string; passed: boolean; details?: string }[] = [];
@@ -40,10 +41,10 @@ export function runSplitEngineSanityTests() {
   results.push({ test: '₹50,000 Large Invoice Slicing', passed: pass50k, details: `Count: ${tranches50k.length}, Sum: ₹${sum50k}` });
 
   // Test 6: UPI URI Building & Parsing
-  const uri = buildUpiUri({ vpa: 'store@upi', name: 'Kirana Store', amount: 1999, note: 'Tranche 1' });
+  const uri = buildUpiUri({ vpa: 'store-123.user@okhdfcbank', name: 'Kirana Store & Sons', amount: 1999, note: 'Tranche 1' });
   const parsed = parseUpiUri(uri);
-  const pass6 = parsed.pa === 'store@upi' && parsed.pn === 'Kirana Store' && parsed.am === '1999.00';
-  results.push({ test: 'UPI URI Building & Parsing', passed: pass6, details: JSON.stringify(parsed) });
+  const pass6 = parsed.pa === 'store-123.user@okhdfcbank' && parsed.pn === 'Kirana Store & Sons' && parsed.am === '1999.00';
+  results.push({ test: 'UPI URI Building & Parsing with Special Chars', passed: pass6, details: JSON.stringify(parsed) });
 
   // Test 7: Plain VPA Raw String Parsing
   const parsedVpa = parseUpiUri('merchant@okhdfcbank');
@@ -67,8 +68,20 @@ export function runSplitEngineSanityTests() {
   const pass9 = Math.abs(mdr6800 - 27.20) < 0.01;
   results.push({ test: 'MDR Gateway Fee Math', passed: pass9, details: `MDR: ₹${mdr6800}` });
 
-  if (typeof window !== 'undefined') {
-    console.log('SplitUPI QA Test Suite Results:', results);
-  }
-  return results.every(r => r.passed);
+  // Test 10: Import Data Malformed JSON Schema Rejection
+  const badImportRes = importData('{"appName":"FlowUPI","version":1,"data":{"history":[{"invalid":"obj"}]}}');
+  const pass10 = badImportRes.success && badImportRes.message.includes('0 valid orders');
+  results.push({ test: 'Malformed Backup JSON Schema Validation', passed: pass10, details: badImportRes.message });
+
+  const allPassed = results.every(r => r.passed);
+  console.log('FlowUPI QA Test Suite Results:', {
+    total: results.length,
+    passed: results.filter(r => r.passed).length,
+    failed: results.filter(r => !r.passed).length,
+    results,
+  });
+
+  return allPassed;
 }
+
+runSplitEngineSanityTests();

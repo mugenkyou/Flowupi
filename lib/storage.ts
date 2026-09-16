@@ -226,6 +226,46 @@ export function exportData(): void {
   }
 }
 
+function isValidOrder(obj: unknown): obj is SplitOrder {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o.orderId === 'string' &&
+    typeof o.merchantVpa === 'string' &&
+    typeof o.merchantName === 'string' &&
+    typeof o.totalAmount === 'number' &&
+    !isNaN(o.totalAmount as number) &&
+    (o.totalAmount as number) >= 0 &&
+    Array.isArray(o.tranches) &&
+    (o.tranches as unknown[]).every(
+      (t) =>
+        t &&
+        typeof t === 'object' &&
+        typeof (t as Record<string, unknown>).id === 'string' &&
+        typeof (t as Record<string, unknown>).index === 'number' &&
+        typeof (t as Record<string, unknown>).amount === 'number' &&
+        !isNaN((t as Record<string, unknown>).amount as number) &&
+        typeof (t as Record<string, unknown>).upiUri === 'string' &&
+        typeof (t as Record<string, unknown>).status === 'string'
+    )
+  );
+}
+
+function isValidGroup(obj: unknown): obj is GroupSplitRecord {
+  if (!obj || typeof obj !== 'object') return false;
+  const g = obj as Record<string, unknown>;
+  return (
+    typeof g.id === 'string' &&
+    typeof g.groupName === 'string' &&
+    typeof g.totalAmount === 'number' &&
+    !isNaN(g.totalAmount as number) &&
+    typeof g.numberOfPeople === 'number' &&
+    Array.isArray(g.friendNames) &&
+    typeof g.merchantName === 'string' &&
+    typeof g.merchantVpa === 'string'
+  );
+}
+
 export function importData(jsonContent: string): { success: boolean; message: string } {
   if (typeof window === 'undefined') {
     return { success: false, message: 'SSR environment' };
@@ -245,14 +285,21 @@ export function importData(jsonContent: string): { success: boolean; message: st
       return { success: false, message: 'Invalid backup file: Payload data missing.' };
     }
 
-    // Restore History
+    let importedOrdersCount = 0;
+    let importedGroupsCount = 0;
+
+    // Restore & Validate History
     if (Array.isArray(parsed.data.history)) {
-      localStorage.setItem(KEYS.HISTORY, JSON.stringify(parsed.data.history));
+      const validHistory = parsed.data.history.filter(isValidOrder);
+      localStorage.setItem(KEYS.HISTORY, JSON.stringify(validHistory));
+      importedOrdersCount = validHistory.length;
     }
 
-    // Restore Groups
+    // Restore & Validate Groups
     if (Array.isArray(parsed.data.groups)) {
-      localStorage.setItem(KEYS.GROUPS, JSON.stringify(parsed.data.groups));
+      const validGroups = parsed.data.groups.filter(isValidGroup);
+      localStorage.setItem(KEYS.GROUPS, JSON.stringify(validGroups));
+      importedGroupsCount = validGroups.length;
     }
 
     // Restore Preferences
@@ -260,12 +307,13 @@ export function importData(jsonContent: string): { success: boolean; message: st
       localStorage.setItem(KEYS.PREFERENCES, JSON.stringify(parsed.data.preferences));
     }
 
-    // Dispatch update notification event
+    // Dispatch update notification events
     window.dispatchEvent(new CustomEvent('flowupi:data_imported'));
+    window.dispatchEvent(new CustomEvent('splitupi:data_imported'));
 
     return {
       success: true,
-      message: `Successfully imported backup data (${parsed.data.history?.length || 0} orders, ${parsed.data.groups?.length || 0} groups).`,
+      message: `Successfully imported backup data (${importedOrdersCount} valid orders, ${importedGroupsCount} valid groups).`,
     };
   } catch (err) {
     return {

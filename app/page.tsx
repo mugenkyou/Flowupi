@@ -87,6 +87,8 @@ export default function HomePage() {
       processDecodedResult(result);
     } catch (_) {
       setErrorMsg('COULD NOT DECODE QR: Unable to detect a valid UPI QR code in the uploaded image file.');
+    } finally {
+      e.target.value = '';
     }
   };
 

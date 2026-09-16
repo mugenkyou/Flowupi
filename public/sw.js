@@ -64,8 +64,12 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // Offline fallback to cached shell
-          return cachedResponse || caches.match('/');
+          // Offline fallback to cached shell for navigation requests
+          if (cachedResponse) return cachedResponse;
+          if (request.mode === 'navigate') {
+            return caches.match('/');
+          }
+          return undefined;
         });
 
       return cachedResponse || fetchPromise;

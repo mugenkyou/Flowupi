@@ -214,14 +214,7 @@ export default function GroupSplitPage() {
             </div>
 
             <NeoPopButton type="submit" variant="primary">
-              <Zap className="h-4 w-4" /> GENERATE GROUP TRANCHE SLICES
-            </NeoPopButton>
-
-            <NeoPopButton
-              type="submit"
-              variant="secondary"
-            >
-              <Zap className="h-4 w-4" /> GENERATE GROUP QR CARDS
+              <Zap className="h-4 w-4" /> GENERATE GROUP SPLIT QR CARDS
             </NeoPopButton>
           </form>
 

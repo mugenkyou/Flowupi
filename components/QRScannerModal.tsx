@@ -40,8 +40,10 @@ export function QRScannerModal({
   const [errorMsg, setErrorMsg] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isProcessingRef = useRef<boolean>(false);
 
   useEffect(() => {
+    isProcessingRef.current = false;
     if (!isOpen || activeTab !== 'camera') {
       stopCamera();
       return;
@@ -89,10 +91,13 @@ export function QRScannerModal({
   };
 
   const handleScannedResult = (rawData: string) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
     stopCamera();
     const parsed = parseUpiUri(rawData);
 
     if (!parsed.pa) {
+      isProcessingRef.current = false;
       setErrorMsg('Invalid UPI QR code or VPA missing. Please scan a valid merchant UPI QR.');
       return;
     }
@@ -136,6 +141,8 @@ export function QRScannerModal({
       handleScannedResult(result);
     } catch (_) {
       setErrorMsg('Could not detect a valid UPI QR code in the uploaded image.');
+    } finally {
+      e.target.value = '';
     }
   };
 

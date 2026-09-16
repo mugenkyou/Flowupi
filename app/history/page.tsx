@@ -43,8 +43,12 @@ export default function HistoryPage() {
       loadData();
     };
 
+    window.addEventListener('flowupi:data_imported', handleDataImported);
     window.addEventListener('splitupi:data_imported', handleDataImported);
-    return () => window.removeEventListener('splitupi:data_imported', handleDataImported);
+    return () => {
+      window.removeEventListener('flowupi:data_imported', handleDataImported);
+      window.removeEventListener('splitupi:data_imported', handleDataImported);
+    };
   }, []);
 
   const handleDelete = (orderId: string, e: React.MouseEvent) => {
@@ -81,6 +85,8 @@ export default function HistoryPage() {
       }
     } catch (_) {
       setFeedbackMsg({ type: 'error', text: 'Failed to read backup file.' });
+    } finally {
+      e.target.value = '';
     }
     setTimeout(() => setFeedbackMsg(null), 4000);
   };
