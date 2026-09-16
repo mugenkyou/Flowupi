@@ -14,10 +14,26 @@ export interface InternalLinkItem {
   description: string;
 }
 
+export interface KeyValueParam {
+  key: string;
+  name: string;
+  description: string;
+  example?: string;
+}
+
+export interface StepItem {
+  stepNumber: number;
+  title: string;
+  text: string;
+}
+
 export interface BlogSection {
   heading: string;
   level: 'h2' | 'h3';
   content: string;
+  keyValues?: KeyValueParam[];
+  steps?: StepItem[];
+  listItems?: string[];
   table?: {
     headers: string[];
     rows: string[][];
@@ -72,7 +88,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         heading: 'What is a UPI QR Code and How Does It Work?',
         level: 'h2',
-        content: `A UPI QR code is a two-dimensional barcode standardized under National Payments Corporation of India (NPCI) guidelines. It encodes a standard payment URI intent string—starting with \`upi://pay\`—that contains essential transaction routing instructions.
+        content: `A UPI QR code is a two-dimensional barcode standardized under National Payments Corporation of India (NPCI) guidelines. It encodes a standard payment URI intent string—starting with upi://pay—that contains essential transaction routing instructions.
 
 When you scan a merchant QR code using any UPI-enabled application or web scanner, your device parses the string parameters (such as the payee Virtual Payment Address or VPA, payee name, and optional pre-filled bill amount). Your app then communicates securely with the Unified Payments Interface rail to initiate an instant bank-to-bank funds transfer via IMPS infrastructure.`,
       },
@@ -85,7 +101,7 @@ When you scan a merchant QR code using any UPI-enabled application or web scanne
           rows: [
             ['Bill Amount Encoded', 'No (User enters amount manually)', 'Yes (Exact invoice amount pre-filled)'],
             ['Common Usage Site', 'Printed counter standees at local shops', 'Digital POS screens, e-commerce, bill printed receipts'],
-            ['Transaction Reference', 'Generic merchant account ID', 'Unique invoice/order reference string (\`tr\` parameter)'],
+            ['Transaction Reference', 'Generic merchant account ID', 'Unique invoice/order reference string (tr parameter)'],
             ['Reusability', 'Reused for thousands of customers', 'One-time use per specific order'],
           ],
         },
@@ -93,37 +109,102 @@ When you scan a merchant QR code using any UPI-enabled application or web scanne
       {
         heading: 'Step-by-Step: How to Scan and Pay via UPI QR',
         level: 'h2',
-        content: `1. **Open Camera or QR Scanner**: Launch your preferred payment app or open a web-based QR utility.
-2. **Align Code in Frame**: Position your phone camera over the printed or digital QR standee until the box highlights the pattern.
-3. **Verify Payee Details**: Check the displayed merchant name and Virtual Payment Address (\`pa\` parameter, e.g. \`storename@upi\` or \`merchant@okicici\`).
-4. **Enter or Confirm Amount**: On static QR codes, type the exact bill amount in Indian Rupees (₹). On dynamic codes, confirm the pre-filled amount matches your invoice.
-5. **Authenticate with UPI PIN**: Enter your secret 4-digit or 6-digit bank UPI PIN.
-6. **Confirmation Screen**: Verify the instant green confirmation alert before leaving the counter.`,
+        content: `Follow these structured steps for a smooth payment experience:`,
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Open Camera or QR Scanner',
+            text: 'Launch your preferred payment app or open a web-based QR utility.',
+          },
+          {
+            stepNumber: 2,
+            title: 'Align Code in Frame',
+            text: 'Position your phone camera over the printed or digital QR standee until the target box highlights the pattern.',
+          },
+          {
+            stepNumber: 3,
+            title: 'Verify Payee Details',
+            text: 'Check the displayed merchant name and Virtual Payment Address (pa parameter, e.g. bistro@upi or merchant@okicici).',
+          },
+          {
+            stepNumber: 4,
+            title: 'Enter or Confirm Amount',
+            text: 'On static QR codes, type the exact bill amount in Indian Rupees (₹). On dynamic codes, confirm the pre-filled amount matches your invoice.',
+          },
+          {
+            stepNumber: 5,
+            title: 'Authenticate with UPI PIN',
+            text: 'Enter your secret 4-digit or 6-digit bank UPI PIN.',
+          },
+          {
+            stepNumber: 6,
+            title: 'Verify Confirmation Screen',
+            text: 'Verify the instant green confirmation alert before leaving the counter.',
+          },
+        ],
       },
       {
         heading: 'Information Encoded Inside a Standard UPI QR',
         level: 'h2',
-        content: `A standard NPCI-compliant UPI QR matrix contains key-value pairs formatted like a URL query parameter string:
-• **\`pa\` (Payee Address)**: The merchant's VPA (e.g. \`bistro@upi\`).
-• **\`pn\` (Payee Name)**: The legal registered merchant business name.
-• **\`am\` (Amount)**: Optional invoice numerical value in INR.
-• **\`cu\` (Currency)**: Set to \`INR\` for Indian transactions.
-• **\`tn\` (Transaction Note)**: Purpose or bill description.
-• **\`tr\` (Transaction Reference)**: Unique order ID for automated merchant ledger reconciliation.`,
+        content: `A standard NPCI-compliant UPI QR matrix contains key-value pairs formatted like a URL query parameter string. Here is the exact parameter schema specification:`,
+        keyValues: [
+          {
+            key: 'pa',
+            name: 'Payee Address (VPA)',
+            description: "The merchant's Virtual Payment Address where funds are deposited.",
+            example: 'bistro@upi',
+          },
+          {
+            key: 'pn',
+            name: 'Payee Name',
+            description: 'The legal registered business or merchant name displayed at checkout.',
+            example: 'Bistro Grill Pvt Ltd',
+          },
+          {
+            key: 'am',
+            name: 'Amount',
+            description: 'Optional pre-filled invoice numerical value in INR (used in dynamic QR codes).',
+            example: '1800.00',
+          },
+          {
+            key: 'cu',
+            name: 'Currency',
+            description: 'ISO currency code, set to INR for Indian Rupee transactions.',
+            example: 'INR',
+          },
+          {
+            key: 'tn',
+            name: 'Transaction Note',
+            description: 'Bill note or payment purpose displayed to the user.',
+            example: 'Dinner Bill Split',
+          },
+          {
+            key: 'tr',
+            name: 'Transaction Reference',
+            description: 'Unique merchant order ID for automated ledger reconciliation.',
+            example: 'ORD948201',
+          },
+        ],
       },
       {
         heading: 'Common QR Payment Problems and Troubleshooting',
         level: 'h2',
-        content: `• **Camera Unable to Focus**: Dirty lens or severe glare. Clean the camera glass or import a gallery screenshot of the QR code instead.
-• **Invalid VPA Error**: Occurs when scanning corrupted or unofficial QR codes. Always request a fresh standee code or raw \`upi://pay\` link.
-• **Payment Timed Out**: Server degradation on sender or receiver bank systems. Check account statement before retrying to prevent double debiting.`,
+        content: `Here are solutions for common scanning hurdles:`,
+        listItems: [
+          'Camera Unable to Focus: Dirty lens or severe glare. Clean the camera glass or import a gallery screenshot of the QR code instead.',
+          'Invalid VPA Error: Occurs when scanning corrupted or unofficial QR codes. Always request a fresh standee code or raw upi://pay link.',
+          'Payment Timed Out: Server degradation on sender or receiver bank systems. Check account statement before retrying to prevent double debiting.',
+        ],
       },
       {
         heading: 'Essential QR Payment Safety Tips',
         level: 'h2',
-        content: `• **CRITICAL RULE: You NEVER need to enter your UPI PIN to RECEIVE money.** Entering a PIN always DEBITS funds from your bank account.
-• **Check Sticker Physical Integrity**: Beware of fraud stickers pasted over genuine merchant counter QR codes. Verify payee name verbally with the merchant.
-• **Inspect VPA Format**: Ensure the VPA matches the merchant's known business handle before authorizing payment.`,
+        content: `Protect your money by adhering to these security guidelines:`,
+        listItems: [
+          'CRITICAL RULE: You NEVER need to enter your UPI PIN to RECEIVE money. Entering a PIN always DEBITS funds from your bank account.',
+          'Check Sticker Physical Integrity: Beware of fraud stickers pasted over genuine merchant counter QR codes. Verify payee name verbally with the merchant.',
+          'Inspect VPA Format: Ensure the VPA matches the merchant’s known business handle before authorizing payment.',
+        ],
         callout: {
           title: 'Instant QR Parsing & Screenshot Import with FlowUPI',
           text: 'Need to process a saved payment QR screenshot or extract UPI intent parameters instantly on desktop or mobile without app bloat? Use FlowUPI’s local web scanner workstation.',
@@ -200,13 +281,16 @@ When you scan a merchant QR code using any UPI-enabled application or web scanne
       {
         heading: 'Equal Splitting vs. Itemized Splitting',
         level: 'h2',
-        content: `• **Equal Bill Splitting**: Best when everyone ordered comparable items. The total final bill is divided evenly by the number of participants.
-• **Itemized Bill Splitting**: Essential when individual orders vary significantly (e.g. non-drinkers vs. cocktail orders, or vegetarian vs. premium platters). Taxes and service charges are prorated proportionally.`,
+        content: `Choose the appropriate splitting model for your group dining scenario:`,
+        listItems: [
+          'Equal Bill Splitting: Best when everyone ordered comparable items. The total final bill is divided evenly by the number of participants.',
+          'Itemized Bill Splitting: Essential when individual orders vary significantly (e.g. non-drinkers vs. cocktail orders, or vegetarian vs. premium platters). Taxes and service charges are prorated proportionally.',
+        ],
       },
       {
         heading: 'Realistic Worked Example: ₹4,800 Group Dinner',
         level: 'h2',
-        content: `Consider a total restaurant bill of **₹4,800** paid by one host for a group of **6 people**.`,
+        content: `Consider a total restaurant bill of ₹4,800 paid by one host for a group of 6 people. Equal share equals ₹800.00 each:`,
         table: {
           headers: ['Member', 'Calculation Method', 'Share Amount (₹)', 'Payment Method'],
           rows: [
@@ -224,21 +308,24 @@ When you scan a merchant QR code using any UPI-enabled application or web scanne
         level: 'h2',
         content: `When calculating custom itemized shares, multiply each person's subtotal by the bill multiplier factor:
 
-$$\\text{Multiplier} = \\frac{\\text{Total Final Invoice (including GST + Tip)}}{\\text{Sum of Food & Beverage Subtotals}}$$
+Multiplier = Total Final Invoice (including GST + Tip) ÷ Sum of Food Subtotals
 
-For example, if food subtotals equal ₹4,000 and the final bill with 5% GST and 10% service charge is ₹4,600, the multiplier is $4,600 \\div 4,000 = 1.15$. A friend whose food items total ₹600 owes $600 \\times 1.15 = \\text{₹690}$.`,
+For example, if food subtotals equal ₹4,000 and the final bill with 5% GST and 10% service charge is ₹4,600, the multiplier is 4,600 ÷ 4,000 = 1.15. A friend whose food items total ₹600 owes 600 × 1.15 = ₹690.`,
       },
       {
         heading: 'Handling Rounding Differences and 1-Paise Errors',
         level: 'h2',
-        content: `When dividing bills like ₹1,000 among 3 people (₹333.333...), exact 2-decimal rounding leaves ₹0.01 unallocated ($333.33 \\times 3 = 999.99$). Always assign the 1-paise rounding difference to the last tranche or host account to ensure the mathematical sum equals the exact original invoice.`,
+        content: `When dividing bills like ₹1,000 among 3 people (₹333.333...), exact 2-decimal rounding leaves ₹0.01 unallocated (333.33 × 3 = 999.99). Always assign the 1-paise rounding difference to the last tranche or host account to ensure the mathematical sum equals the exact original invoice.`,
       },
       {
         heading: 'Common Mistakes to Avoid',
         level: 'h2',
-        content: `• **Forgetting Tax/Tip in Subtotals**: Adding base food items without accounting for taxes creates a deficit for the person who paid the card.
-• **Untracked Cash Payments**: Mixing partial cash payouts with digital UPI transfers without recording settled statuses.
-• **Sending Vague Reminders**: Texting "Hey, pay me for dinner" instead of providing a direct UPI payment link pre-filled with the exact amount.`,
+        content: `Avoid these common bill splitting pitfalls:`,
+        listItems: [
+          'Forgetting Tax/Tip in Subtotals: Adding base food items without accounting for taxes creates a deficit for the person who paid the card.',
+          'Untracked Cash Payments: Mixing partial cash payouts with digital UPI transfers without recording settled statuses.',
+          'Sending Vague Reminders: Texting "Hey, pay me for dinner" instead of providing a direct UPI payment link pre-filled with the exact amount.',
+        ],
         callout: {
           title: 'Generate Individual Friend UPI QR Cards with FlowUPI',
           text: 'Skip manual calculations. FlowUPI lets you create individual slice payment QR cards and instant WhatsApp share links for every friend in seconds.',
@@ -315,24 +402,27 @@ For example, if food subtotals equal ₹4,000 and the final bill with 5% GST and
       {
         heading: 'NPCI Regulations and Standard UPI Limits',
         level: 'h2',
-        content: `It is critical to understand that **splitting an amount into multiple payments does NOT alter or bypass regulatory, bank, or NPCI transaction limits**.
-
-Key official NPCI UPI guidelines include:
-• **Standard Daily Upper Limit**: Generally ₹1,000,000 (₹1 Lakh) per day per user across standard peer-to-peer (P2P) transfers (specific categories like healthcare, capital markets, and education have higher caps up to ₹5 Lakhs).
-• **Transaction Count Limits**: Most issuing banks restrict accounts to a maximum of 10 or 20 UPI outbound transactions per 24-hour window.
-• **Bank-Specific Caps**: Individual banks (e.g. SBI, HDFC, ICICI) impose per-transaction limits (such as ₹25,000 or ₹100,000 per single transfer).`,
+        content: `It is critical to understand that splitting an amount into multiple payments does NOT alter or bypass regulatory, bank, or NPCI transaction limits. Key official rules include:`,
+        listItems: [
+          'Standard Daily Upper Limit: Generally ₹1,000,000 (₹1 Lakh) per day per user across standard peer-to-peer (P2P) transfers (specific categories like healthcare and education have higher caps up to ₹5 Lakhs).',
+          'Transaction Count Limits: Most issuing banks restrict accounts to a maximum of 10 or 20 UPI outbound transactions per 24-hour window.',
+          'Bank-Specific Caps: Individual banks (e.g. SBI, HDFC, ICICI) impose per-transaction limits (such as ₹25,000 or ₹100,000 per single transfer).',
+        ],
       },
       {
         heading: 'Why Merchants and Buyers Use Payment Tranches',
         level: 'h2',
-        content: `1. **Structured Progress Billing**: Micro-settlements allow buyers to pay in milestones as goods or services are delivered.
-2. **Accounting Category Management**: Businesses tranche expenses to categorize distinct invoice sub-components (e.g. materials vs. labor).
-3. **Fee Structure Arbitrage**: Surcharge and interchange tiers on certain merchant categories differ for transactions of ₹2,000 or under compared to higher slabs.`,
+        content: `Common operational reasons for payment tranching:`,
+        listItems: [
+          'Structured Progress Billing: Micro-settlements allow buyers to pay in milestones as goods or services are delivered.',
+          'Accounting Category Management: Businesses tranche expenses to categorize distinct invoice sub-components (e.g. materials vs. labor).',
+          'Fee Structure Arbitrage: Surcharge and interchange tiers on certain merchant categories differ for transactions of ₹2,000 or under compared to higher slabs.',
+        ],
       },
       {
         heading: 'Worked Calculation: Dividing ₹6,000 into Sub-₹2,000 Micro-Tranches',
         level: 'h2',
-        content: `To tranche a **₹6,000** bill into sub-₹2,000 components, calculate the required number of steps ($6,000 \\div 1,999 \\approx 3.001 \\rightarrow 4 \\text{ tranches}$):`,
+        content: `To tranche a ₹6,000 bill into sub-₹2,000 components, calculate the required number of steps (6,000 ÷ 1,999 ≈ 4 tranches):`,
         table: {
           headers: ['Tranche #', 'Target Cap (₹)', 'Calculated Amount (₹)', 'Cumulative Settled (₹)'],
           rows: [
@@ -346,10 +436,24 @@ Key official NPCI UPI guidelines include:
       {
         heading: 'Sequential Progress Tracking and Safety',
         level: 'h2',
-        content: `When executing multiple payments for a single bill:
-1. **Never Skip Tranches**: Settle step #1 before attempting step #2 to keep ledger records coherent.
-2. **Verify Unique Transaction References**: Ensure each tranche URI includes a specific reference tag (\`tr\` parameter) to prevent payment gateways from mistaking step #2 for a duplicate submission of step #1.
-3. **Monitor Daily Bank Count**: Ensure your total transaction count stays within your bank's daily 10–20 transaction limit.`,
+        content: `Follow these best practices when executing multiple tranche payments:`,
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Settle Sequentially',
+            text: 'Never skip tranches. Settle step #1 before attempting step #2 to keep ledger records coherent.',
+          },
+          {
+            stepNumber: 2,
+            title: 'Verify Unique Reference Tags',
+            text: 'Ensure each tranche URI includes a specific reference tag (tr parameter) to prevent payment gateways from mistaking step #2 for a duplicate submission of step #1.',
+          },
+          {
+            stepNumber: 3,
+            title: 'Monitor Daily Bank Count',
+            text: 'Ensure your total transaction count stays within your bank’s daily 10–20 transaction limit.',
+          },
+        ],
         callout: {
           title: 'Automate Micro-Tranche Calculations with FlowUPI',
           text: 'FlowUPI’s POS Tranche Engine automatically splits any bill into randomized sub-₹2,000 slices, complete with progress bars and step-by-step QR cards.',
@@ -426,19 +530,21 @@ Key official NPCI UPI guidelines include:
       {
         heading: 'Official UPI MDR Policy Framework in India',
         level: 'h2',
-        content: `To promote digital payment adoption, the Government of India and the Reserve Bank of India (RBI) introduced key policy mandates:
-• **Standard Savings Bank Account UPI (P2M)**: Mandatory **0% MDR**. Merchants cannot be charged processing fees for receiving funds directly from a customer's linked savings bank account via UPI.
-• **Prepaid Payment Instruments (PPI Wallets on UPI)**: An interchange fee of up to **1.1%** applies to merchant transactions exceeding ₹2,000 funded via digital wallets.
-• **RuPay Credit Cards on UPI**: Standard credit card interchange fees (ranging from 0.4% to 2.0% depending on merchant category code) apply for transactions above ₹2,000. Transactions of ₹2,000 or below carry **0% MDR**.`,
+        content: `To promote digital payment adoption, the Government of India and the Reserve Bank of India (RBI) introduced key policy mandates:`,
+        listItems: [
+          'Standard Savings Bank Account UPI (P2M): Mandatory 0% MDR. Merchants cannot be charged processing fees for receiving funds directly from a customer’s linked savings bank account via UPI.',
+          'Prepaid Payment Instruments (PPI Wallets on UPI): An interchange fee of up to 1.1% applies to merchant transactions exceeding ₹2,000 funded via digital wallets.',
+          'RuPay Credit Cards on UPI: Standard credit card interchange fees (ranging from 0.4% to 2.0% depending on merchant category code) apply for transactions above ₹2,000. Transactions of ₹2,000 or below carry 0% MDR.',
+        ],
       },
       {
         heading: 'Mathematical Breakdown of MDR Calculations',
         level: 'h2',
-        content: `MDR calculation uses two fundamental parameters: the percentage fee rate ($r$) and the fee cap limit ($C$).
+        content: `MDR calculation uses two fundamental parameters: the percentage fee rate (r) and the fee cap limit (C).
 
-$$\\text{MDR Fee} = \\min\\left( \\text{Transaction Amount} \\times \\frac{r}{100}, C \\right)$$
+MDR Fee = Min(Transaction Amount × r / 100, C)
 
-$$\\text{Net Merchant Settlement} = \\text{Transaction Amount} - \\text{MDR Fee}$$`,
+Net Merchant Settlement = Transaction Amount - MDR Fee`,
       },
       {
         heading: 'Worked Calculation: Comparing Transaction Value Slabs',
@@ -534,17 +640,44 @@ $$\\text{Net Merchant Settlement} = \\text{Transaction Amount} - \\text{MDR Fee}
       {
         heading: 'The 6-Step Group Settlement System',
         level: 'h2',
-        content: `1. **Appoint a Group Lead**: One person manages the central ledger or tool.
-2. **Calculate Final Invoice Total**: Sum all vendor receipts including taxes and delivery fees.
-3. **Establish Per-Person Shares**: Determine equal shares or itemized individual additions.
-4. **Distribute Direct UPI Payment Links**: Provide each participant with a direct link or QR code containing their exact share amount.
-5. **Track Payments Real-Time**: Update status flags (Pending $\\rightarrow$ Paid) as payments hit your account.
-6. **Confirm Full Settlement**: Verify that the sum of paid individual shares equals 100% of the vendor invoice.`,
+        content: `Follow this 6-step system to settle group expenses without confusion:`,
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Appoint a Group Lead',
+            text: 'One person manages the central ledger or tool.',
+          },
+          {
+            stepNumber: 2,
+            title: 'Calculate Final Invoice Total',
+            text: 'Sum all vendor receipts including taxes and delivery fees.',
+          },
+          {
+            stepNumber: 3,
+            title: 'Establish Per-Person Shares',
+            text: 'Determine equal shares or itemized individual additions.',
+          },
+          {
+            stepNumber: 4,
+            title: 'Distribute Direct UPI Payment Links',
+            text: 'Provide each participant with a direct link or QR code containing their exact share amount.',
+          },
+          {
+            stepNumber: 5,
+            title: 'Track Payments Real-Time',
+            text: 'Update status flags (Pending to Paid) as payments hit your account.',
+          },
+          {
+            stepNumber: 6,
+            title: 'Confirm Full Settlement',
+            text: 'Verify that the sum of paid individual shares equals 100% of the vendor invoice.',
+          },
+        ],
       },
       {
         heading: 'Worked Example: ₹12,000 Weekend Trip Expense',
         level: 'h2',
-        content: `Four friends share a resort booking totaling **₹12,000** (₹3,000 per person):`,
+        content: `Four friends share a resort booking totaling ₹12,000 (₹3,000 per person):`,
         table: {
           headers: ['Friend Name', 'Assigned Share (₹)', 'Payment Status', 'Action Taken'],
           rows: [
@@ -563,7 +696,7 @@ $$\\text{Net Merchant Settlement} = \\text{Transaction Amount} - \\text{MDR Fee}
       {
         heading: 'Why Local-First Storage Protects Group Privacy',
         level: 'h2',
-        content: `Many traditional group expense apps require creating accounts, uploading contact books to cloud servers, and subjecting friends to marketing emails. Local-first web utilities keep all group records entirely in your browser's \`localStorage\`—zero cloud uploads, zero account sign-ups, and 100% privacy.`,
+        content: `Many traditional group expense apps require creating accounts, uploading contact books to cloud servers, and subjecting friends to marketing emails. Local-first web utilities keep all group records entirely in your browser’s localStorage—zero cloud uploads, zero account sign-ups, and 100% privacy.`,
         callout: {
           title: 'Split Group Bills Privately with FlowUPI',
           text: 'Create equal or custom group bill splits with instant friend QR cards and WhatsApp share links—stored 100% locally on your device.',
@@ -640,18 +773,49 @@ $$\\text{Net Merchant Settlement} = \\text{Transaction Amount} - \\text{MDR Fee}
       {
         heading: '7 Essential Categories of UPI Payment Utilities',
         level: 'h2',
-        content: `1. **Instant Web QR Camera Scanners**: Scan counter standees directly from desktop or mobile web browsers without needing third-party scanner apps.
-2. **Gallery Screenshot QR Decoders**: Upload or paste saved QR screenshot images to extract embedded payment parameters instantly.
-3. **UPI Intent URI Parsers**: Decode raw \`upi://pay\` string links to verify payee address, merchant name, and transaction note parameters.
-4. **Group Bill & Itemized Splitters**: Divide shared expenses into individual friend slice cards with pre-formatted WhatsApp share links.
-5. **POS Micro-Tranche Engine**: Break down larger bill amounts into structured sub-₹2,000 payment steps.
-6. **MDR Fee & Surcharge Calculators**: Compute merchant processing costs across credit card UPI, PPI wallets, and zero-MDR tiers.
-7. **Merchant Soundbox Audio Synthesizers**: Simulate instant voice confirmation alerts directly through web audio APIs.`,
+        content: `Here are the 7 core utility categories for modern digital payments:`,
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Instant Web QR Camera Scanners',
+            text: 'Scan counter standees directly from desktop or mobile web browsers without needing third-party scanner apps.',
+          },
+          {
+            stepNumber: 2,
+            title: 'Gallery Screenshot QR Decoders',
+            text: 'Upload or paste saved QR screenshot images to extract embedded payment parameters instantly.',
+          },
+          {
+            stepNumber: 3,
+            title: 'UPI Intent URI Parsers',
+            text: 'Decode raw upi://pay string links to verify payee address, merchant name, and transaction note parameters.',
+          },
+          {
+            stepNumber: 4,
+            title: 'Group Bill & Itemized Splitters',
+            text: 'Divide shared expenses into individual friend slice cards with pre-formatted WhatsApp share links.',
+          },
+          {
+            stepNumber: 5,
+            title: 'POS Micro-Tranche Engine',
+            text: 'Break down larger bill amounts into structured sub-₹2,000 payment steps.',
+          },
+          {
+            stepNumber: 6,
+            title: 'MDR Fee & Surcharge Calculators',
+            text: 'Compute merchant processing costs across credit card UPI, PPI wallets, and zero-MDR tiers.',
+          },
+          {
+            stepNumber: 7,
+            title: 'Merchant Soundbox Audio Synthesizers',
+            text: 'Simulate instant voice confirmation alerts directly through web audio APIs.',
+          },
+        ],
       },
       {
         heading: 'Comparison: Native Apps vs. Local-First Web PWAs',
         level: 'h2',
-        content: ``,
+        content: `Compare traditional app stores with local-first web utility architectures:`,
         table: {
           headers: ['Feature / Aspect', 'Traditional Mobile Apps', 'Local-First Web Utilities (FlowUPI)'],
           rows: [
@@ -666,13 +830,15 @@ $$\\text{Net Merchant Settlement} = \\text{Transaction Amount} - \\text{MDR Fee}
       {
         heading: 'How FlowUPI Combines Essential Payment Workstations',
         level: 'h2',
-        content: `FlowUPI brings together these essential payment utilities into a unified, privacy-first web application:
-• **Scan & Pay Workstation**: Live camera scanning, screenshot image import, and raw intent URI parsing.
-• **POS Split Workstation**: Automated sub-₹2,000 micro-tranching with progress tracking.
-• **Group Split Workstation**: Equal and itemized friend bill division with individual QR cards.
-• **MDR Roast Calculator**: Instant merchant fee economics and surcharge analysis.
-• **Soundbox Synthesizer**: Web audio voice confirmation alerts in multiple languages.
-• **Local History Manager**: Searchable transaction logs and offline JSON backup export/import.`,
+        content: `FlowUPI brings together these essential payment utilities into a unified, privacy-first web application:`,
+        listItems: [
+          'Scan & Pay Workstation: Live camera scanning, screenshot image import, and raw intent URI parsing.',
+          'POS Split Workstation: Automated sub-₹2,000 micro-tranching with progress tracking.',
+          'Group Split Workstation: Equal and itemized friend bill division with individual QR cards.',
+          'MDR Roast Calculator: Instant merchant fee economics and surcharge analysis.',
+          'Soundbox Synthesizer: Web audio voice confirmation alerts in multiple languages.',
+          'Local History Manager: Searchable transaction logs and offline JSON backup export/import.',
+        ],
         callout: {
           title: 'Experience All-in-One Payment Utilities with FlowUPI',
           text: 'Explore FlowUPI’s suite of privacy-first, zero-install payment tools directly in your browser.',

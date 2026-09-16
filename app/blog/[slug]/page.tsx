@@ -175,6 +175,74 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
               ))}
             </div>
 
+            {/* Render Key-Value Parameter Cards (e.g. pa, pn, am, cu, tn, tr) */}
+            {sec.keyValues && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-5">
+                {sec.keyValues.map((kv, kvIdx) => (
+                  <div
+                    key={kvIdx}
+                    className="border-[1.5px] border-border-subtle bg-bg-surface p-4 shadow-neo space-y-2 hover:border-brand-primary/60 transition-all"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-black text-brand-primary bg-brand-primary/10 px-2 py-0.5 border border-brand-primary/30">
+                        {kv.key}
+                      </span>
+                      {kv.example && (
+                        <span className="text-[10px] font-mono text-txt-muted bg-bg-elevated px-2 py-0.5 border border-border-subtle">
+                          e.g. {kv.example}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-xs font-black uppercase tracking-wide text-txt-primary">
+                      {kv.name}
+                    </h4>
+                    <p className="text-xs text-txt-secondary leading-relaxed font-semibold">
+                      {kv.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Render Step-by-Step Items */}
+            {sec.steps && (
+              <div className="space-y-3 my-5">
+                {sec.steps.map((st, stIdx) => (
+                  <div
+                    key={stIdx}
+                    className="flex items-start gap-3.5 border-[1.5px] border-border-subtle bg-bg-surface p-4 shadow-neo hover:border-brand-cyan/50 transition-all"
+                  >
+                    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center border border-brand-primary bg-brand-primary/15 text-brand-primary font-black text-xs font-mono shadow-neo-sm">
+                      {st.stepNumber}
+                    </span>
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-txt-primary">
+                        {st.title}
+                      </h4>
+                      <p className="text-xs text-txt-secondary leading-relaxed font-semibold">
+                        {st.text}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Render List Items */}
+            {sec.listItems && (
+              <div className="space-y-2.5 my-4">
+                {sec.listItems.map((li, liIdx) => (
+                  <div
+                    key={liIdx}
+                    className="flex items-start gap-2.5 border border-border-subtle bg-bg-elevated p-3.5 text-xs font-semibold text-txt-secondary shadow-neo-sm"
+                  >
+                    <CheckCircle2 className="h-4 w-4 text-brand-primary flex-shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">{li}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Render Table if present */}
             {sec.table && (
               <div className="overflow-x-auto border-[1.5px] border-border-subtle shadow-neo my-4">
