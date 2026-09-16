@@ -161,6 +161,11 @@ export default function SavingsCalculatorPage() {
               <ArrowRight className="h-4 w-4" />
             </NeoPopButton>
           </Link>
+
+          {/* Contextual Estimate Disclaimer */}
+          <p className="text-[11px] text-txt-muted leading-relaxed border-t border-border-subtle pt-3">
+            <strong>Calculation Disclaimer:</strong> This calculation is an estimate based on the turnover and ticket size values entered. Actual interchange charges may vary depending on the applicable payment provider, acquiring bank agreement, merchant category code (MCC), taxes, and current regulatory transaction terms.
+          </p>
         </div>
       </div>
     </div>

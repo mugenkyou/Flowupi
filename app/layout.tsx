@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 import { OfflineBanner } from '../components/OfflineBanner';
 
 export const metadata: Metadata = {
@@ -15,6 +16,12 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icons/icon.svg',
     apple: '/icons/icon.svg',
+  },
+  openGraph: {
+    title: 'FlowUPI — Fast Local-First UPI Payment Utility',
+    description: 'Local-first web application for QR payments, micro-tranching, MDR calculations, and soundbox simulation.',
+    siteName: 'FlowUPI',
+    type: 'website',
   },
 };
 
@@ -44,14 +51,7 @@ export default function RootLayout({
           {children}
         </main>
         <OfflineBanner />
-        <footer className="border-t border-border-subtle bg-bg-surface/50 py-6 text-center text-xs text-txt-muted">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <span>© 2026 FlowUPI Research · Local-First Web Application</span>
-            <span className="text-[11px] text-txt-muted">
-              Built for academic demonstration & algorithmic simulation of 0% MDR compliance under NPCI guidelines.
-            </span>
-          </div>
-        </footer>
+        <Footer />
       </body>
     </html>
   );

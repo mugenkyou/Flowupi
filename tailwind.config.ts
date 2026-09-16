@@ -14,6 +14,7 @@ const config: Config = {
           elevated: "#131B2B",
         },
         brand: {
+          primary: "#35D6FF",
           cyan: "#35D6FF",
           blue: "#1687FF",
           violet: "#7C5CFF",
@@ -49,6 +50,7 @@ const config: Config = {
       boxShadow: {
         neo: "4px 4px 0px #020409",
         "neo-sm": "2px 2px 0px #020409",
+        "neo-brand": "4px 4px 0px rgba(53, 214, 255, 0.4)",
         "neo-cyan": "4px 4px 0px rgba(53, 214, 255, 0.4)",
         "neo-blue": "4px 4px 0px rgba(22, 135, 255, 0.4)",
         "neo-violet": "4px 4px 0px rgba(124, 92, 255, 0.4)",
