@@ -18,6 +18,9 @@ import {
   ArrowRight,
   ArrowLeft,
   Volume2,
+  Lock,
+  History,
+  Check,
 } from 'lucide-react';
 import { playSoundboxConfirmation } from '../lib/soundbox';
 import { saveOrder } from '../lib/storage';
@@ -41,8 +44,8 @@ export function SplitCheckoutModal({
 
   useEffect(() => {
     setOrder(initialOrder);
-    const pendingIdx = initialOrder.tranches.findIndex((t) => t.status !== 'paid');
-    setActiveTrancheIndex(pendingIdx >= 0 ? pendingIdx : 0);
+    const firstPendingIdx = initialOrder.tranches.findIndex((t) => t.status !== 'paid');
+    setActiveTrancheIndex(firstPendingIdx >= 0 ? firstPendingIdx : 0);
   }, [initialOrder]);
 
   if (!isOpen) return null;
@@ -52,6 +55,9 @@ export function SplitCheckoutModal({
   const progress = calcProgress(order);
   const isComplete = order.tranches.every((t) => t.status === 'paid');
   const mdrSaved = calcMdrSavings(order.totalAmount);
+
+  // Determine the first pending index (all indices beyond this are LOCKED)
+  const firstPendingIndex = order.tranches.findIndex((t) => t.status !== 'paid');
 
   const handleTrancheStatusChange = (
     trancheId: string,
@@ -92,9 +98,7 @@ export function SplitCheckoutModal({
           colors: ['#35D6FF', '#1687FF', '#7C5CFF', '#35D07F'],
         });
       } else {
-        const nextPending = updatedTranches.findIndex(
-          (t, idx) => idx > activeTrancheIndex && t.status !== 'paid'
-        );
+        const nextPending = updatedTranches.findIndex((t) => t.status !== 'paid');
         if (nextPending >= 0) {
           setActiveTrancheIndex(nextPending);
         }
@@ -131,7 +135,7 @@ export function SplitCheckoutModal({
         {/* Top Header Bar */}
         <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4 bg-bg-elevated">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center border border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-neo-sm">
+            <span className="flex h-8 w-8 items-center justify-center border border-brand-primary bg-brand-primary/20 text-brand-primary shadow-neo-sm">
               <Zap className="h-4 w-4" />
             </span>
             <div>
@@ -146,7 +150,7 @@ export function SplitCheckoutModal({
 
           <button
             onClick={onClose}
-            className="border border-border-subtle p-2 text-txt-secondary hover:text-txt-primary"
+            className="border border-border-subtle p-2 text-txt-secondary hover:text-txt-primary hover:border-brand-primary transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -175,8 +179,8 @@ export function SplitCheckoutModal({
               </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="space-y-1.5 pt-2">
+            {/* Dynamic Paid & Remaining Summary */}
+            <div className="space-y-2 pt-2 border-t border-border-subtle">
               <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                 <span className="text-txt-secondary">
                   Paid: <span className="text-status-success">₹{paidAmt.toFixed(2)}</span>
@@ -192,30 +196,106 @@ export function SplitCheckoutModal({
                   style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
                 />
               </div>
+
+              {/* Sequential Progress Timeline Dots */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                {order.tranches.map((t, idx) => {
+                  const isPaidSlice = t.status === 'paid';
+                  const isActiveSlice = idx === activeTrancheIndex;
+                  return (
+                    <React.Fragment key={t.id}>
+                      {idx > 0 && (
+                        <div
+                          className={`h-0.5 w-4 sm:w-6 transition-colors ${
+                            isPaidSlice || idx <= firstPendingIndex
+                              ? 'bg-brand-cyan'
+                              : 'bg-border-subtle'
+                          }`}
+                        />
+                      )}
+                      <div
+                        className={`flex h-5 w-5 items-center justify-center text-[10px] font-black border transition-all ${
+                          isPaidSlice
+                            ? 'border-status-success bg-status-success text-bg'
+                            : isActiveSlice
+                            ? 'border-brand-primary bg-brand-primary text-bg font-black scale-110 shadow-neo-sm'
+                            : 'border-border-subtle bg-bg-surface text-txt-muted'
+                        }`}
+                      >
+                        {isPaidSlice ? '✓' : idx + 1}
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* 100% Completion Celebration Banner */}
+          {/* COMPLETION STATE */}
           {isComplete ? (
-            <div className="flex flex-col items-center justify-center text-center p-6 border-[1.5px] border-status-success bg-status-success/15 text-status-success space-y-3 shadow-neo-success">
-              <div className="flex h-14 w-14 items-center justify-center border-2 border-bg bg-status-success text-bg">
-                <CheckCircle2 className="h-8 w-8" />
+            <div className="border-[1.5px] border-status-success bg-status-success/10 p-6 text-center space-y-4 shadow-neo-success">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center border-2 border-bg bg-status-success text-bg shadow-neo-sm">
+                <CheckCircle2 className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-black uppercase tracking-wider">All Tranches Settled!</h3>
-              <p className="text-xs text-txt-secondary max-w-md font-bold">
-                All {order.tranches.length} sub-₹2,000 micro-tranches for ₹{order.totalAmount.toFixed(2)} have been paid with 0% MDR fee.
-              </p>
-              <NeoPopButton onClick={onClose} variant="success">
-                DONE / CLOSE CHECKOUT
-              </NeoPopButton>
+
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-tight text-status-success">
+                  All Tranches Paid!
+                </h3>
+                <p className="text-xs font-bold text-txt-secondary mt-1">
+                  Payment of ₹{order.totalAmount.toFixed(2)} to {order.merchantName} ({order.merchantVpa}) completed successfully via sub-₹2,000 micro-tranches.
+                </p>
+              </div>
+
+              {/* Final Transaction Summary */}
+              <div className="border border-border-subtle bg-bg-surface p-4 text-left space-y-2 text-xs">
+                <div className="flex justify-between border-b border-border-subtle pb-1.5 font-bold">
+                  <span className="text-txt-muted">Payee VPA:</span>
+                  <span className="text-txt-primary font-mono">{order.merchantVpa}</span>
+                </div>
+                <div className="flex justify-between border-b border-border-subtle pb-1.5 font-bold">
+                  <span className="text-txt-muted">Total Paid:</span>
+                  <span className="text-status-success font-black">₹{order.totalAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between border-b border-border-subtle pb-1.5 font-bold">
+                  <span className="text-txt-muted">Total Micro-Tranches:</span>
+                  <span className="text-txt-primary">{order.tranches.length} Tranches</span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span className="text-txt-muted">Completed Date:</span>
+                  <span className="text-txt-primary">{new Date().toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <NeoPopButton onClick={onClose} variant="success">
+                  <Check className="h-4 w-4" /> DONE
+                </NeoPopButton>
+
+                <NeoPopButton
+                  onClick={() => {
+                    onClose();
+                    window.location.href = '/history';
+                  }}
+                  variant="secondary"
+                >
+                  <History className="h-4 w-4" /> VIEW IN HISTORY
+                </NeoPopButton>
+              </div>
             </div>
           ) : (
             <>
               {/* Step Navigation Bar */}
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-black uppercase tracking-wider text-txt-secondary">
-                  Micro-Tranches ({order.tranches.length} Slices)
-                </h3>
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-wider text-txt-primary">
+                    Sequential Micro-Tranches ({order.tranches.length} Total)
+                  </h3>
+                  <p className="text-[11px] font-bold text-txt-muted">
+                    Pay tranche #{activeTrancheIndex + 1} and click &quot;Mark as Paid&quot; to unlock next tranche.
+                  </p>
+                </div>
+
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setActiveTrancheIndex((prev) => Math.max(0, prev - 1))}
@@ -230,10 +310,13 @@ export function SplitCheckoutModal({
                   <button
                     onClick={() =>
                       setActiveTrancheIndex((prev) =>
-                        Math.min(order.tranches.length - 1, prev + 1)
+                        Math.min(firstPendingIndex >= 0 ? firstPendingIndex : order.tranches.length - 1, prev + 1)
                       )
                     }
-                    disabled={activeTrancheIndex === order.tranches.length - 1}
+                    disabled={
+                      activeTrancheIndex >= firstPendingIndex ||
+                      firstPendingIndex === -1
+                    }
                     className="border border-border-subtle p-1.5 text-txt-secondary hover:text-txt-primary disabled:opacity-40"
                   >
                     <ArrowRight className="h-4 w-4" />
@@ -241,41 +324,53 @@ export function SplitCheckoutModal({
                 </div>
               </div>
 
-              {/* Active Tranche Card */}
+              {/* Current Actionable / Locked Tranche Card */}
               {currentTranche && (
                 <TrancheCard
                   tranche={currentTranche}
                   totalTranches={order.tranches.length}
                   merchantName={order.merchantName}
-                  isCurrentActive={true}
+                  isCurrentActive={activeTrancheIndex === firstPendingIndex}
+                  isLocked={activeTrancheIndex > firstPendingIndex && firstPendingIndex !== -1}
                   onStatusChange={handleTrancheStatusChange}
                 />
               )}
 
-              {/* Slice Status Grid */}
+              {/* Tranche Progression Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {order.tranches.map((t, idx) => {
                   const isActive = idx === activeTrancheIndex;
                   const isPaid = t.status === 'paid';
+                  const isLocked = firstPendingIndex !== -1 && idx > firstPendingIndex;
 
                   return (
                     <button
                       key={t.id}
-                      onClick={() => setActiveTrancheIndex(idx)}
-                      className={`flex flex-col p-2.5 border-[1.5px] text-left transition-all ${
+                      disabled={isLocked}
+                      onClick={() => !isLocked && setActiveTrancheIndex(idx)}
+                      className={`flex flex-col p-2.5 border-[1.5px] text-left transition-all relative ${
                         isActive
                           ? 'border-brand-primary bg-brand-primary/20 shadow-neo-brand'
                           : isPaid
-                          ? 'border-status-success bg-status-success/15'
+                          ? 'border-status-success bg-status-success/15 hover:border-status-success'
+                          : isLocked
+                          ? 'border-border-subtle bg-bg/40 opacity-50 cursor-not-allowed'
                           : 'border-border-subtle bg-bg-elevated hover:border-border-neo'
                       }`}
                     >
                       <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-txt-muted">
-                        <span>Slice #{t.index}</span>
-                        {isPaid && <CheckCircle2 className="h-3 w-3 text-status-success" />}
+                        <span>Tranche #{t.index}</span>
+                        {isPaid ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-status-success" />
+                        ) : isLocked ? (
+                          <Lock className="h-3 w-3 text-txt-muted" />
+                        ) : null}
                       </div>
                       <span className="text-sm font-black text-txt-primary mt-1">
                         ₹{t.amount.toFixed(2)}
+                      </span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider mt-0.5 text-txt-muted">
+                        {isPaid ? 'PAID' : isLocked ? 'LOCKED' : isActive ? 'ACTIVE' : 'READY'}
                       </span>
                     </button>
                   );
@@ -286,7 +381,7 @@ export function SplitCheckoutModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-border-subtle pt-4">
                 <NeoPopButton onClick={handleMarkAllPaid} variant="primary">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>MARK ALL SLICES PAID</span>
+                  <span>MARK ALL TRANCHES PAID</span>
                 </NeoPopButton>
 
                 <NeoPopButton
@@ -306,3 +401,4 @@ export function SplitCheckoutModal({
     </div>
   );
 }
+

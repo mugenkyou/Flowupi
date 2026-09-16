@@ -118,7 +118,7 @@ export default function HomePage() {
   };
 
   const parsedAmountNum = parseFloat(amountInput);
-  const isAmountValid = !isNaN(parsedAmountNum) && parsedAmountNum > 0;
+  const isAmountValid = !isNaN(parsedAmountNum) && isFinite(parsedAmountNum) && parsedAmountNum > 0;
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
