@@ -201,6 +201,15 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
         <QRScannerModal
           isOpen={isScannerOpen}
           onClose={() => setIsScannerOpen(false)}
+          onScannedPayload={(payload) => {
+            setIsScannerOpen(false);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('splitupi:qr_scanned', { detail: payload }));
+            }
+            if (pathname !== '/') {
+              router.push('/');
+            }
+          }}
           onOrderCreated={handleGlobalOrderCreated}
         />
       )}

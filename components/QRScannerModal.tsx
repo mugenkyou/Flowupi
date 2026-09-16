@@ -15,15 +15,24 @@ import {
 } from 'lucide-react';
 import { saveOrder } from '../lib/storage';
 
+export interface ScannedPayload {
+  pa: string;
+  pn: string;
+  note: string;
+  qrAmount?: number;
+}
+
 interface QRScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onScannedPayload?: (payload: ScannedPayload) => void;
   onOrderCreated?: (order: SplitOrder) => void;
 }
 
 export function QRScannerModal({
   isOpen,
   onClose,
+  onScannedPayload,
   onOrderCreated,
 }: QRScannerModalProps) {
   const [activeTab, setActiveTab] = useState<'camera' | 'upload' | 'paste'>('camera');
@@ -88,16 +97,31 @@ export function QRScannerModal({
       return;
     }
 
-    const amount = parsed.am ? parseFloat(parsed.am) : 4500; // default test amount if absent
-    const order = createTrancheOrder({
-      totalAmount: amount,
-      merchantVpa: parsed.pa,
-      merchantName: parsed.pn || 'Merchant',
-      note: parsed.tn || 'SplitUPI Checkout',
-    });
+    const qrAmt = parsed.am && !isNaN(parseFloat(parsed.am)) && parseFloat(parsed.am) > 0
+      ? parseFloat(parsed.am)
+      : undefined;
 
-    saveOrder(order);
-    if (onOrderCreated) onOrderCreated(order);
+    const payload: ScannedPayload = {
+      pa: parsed.pa,
+      pn: parsed.pn || 'Merchant',
+      note: parsed.tn || 'Scan & Pay Checkout',
+      qrAmount: qrAmt,
+    };
+
+    if (onScannedPayload) {
+      onScannedPayload(payload);
+    } else if (onOrderCreated) {
+      if (qrAmt) {
+        const order = createTrancheOrder({
+          totalAmount: qrAmt,
+          merchantVpa: payload.pa,
+          merchantName: payload.pn,
+          note: payload.note,
+        });
+        saveOrder(order);
+        onOrderCreated(order);
+      }
+    }
     onClose();
   };
 
