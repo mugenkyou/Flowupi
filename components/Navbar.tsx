@@ -87,26 +87,26 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsScannerOpen(true)}
-              title="Scan Merchant QR"
-              className="flex items-center justify-center p-2 text-txt-primary hover:text-brand-primary transition-colors"
+              className="flex items-center gap-1.5 border-[1.5px] border-brand-primary bg-brand-primary/10 px-2.5 py-1.5 text-xs font-black text-brand-primary shadow-neo-sm hover:bg-brand-primary/20 active:translate-x-[1px] active:translate-y-[1px]"
             >
-              <QrCode className="h-5 w-5" />
+              <QrCode className="h-4 w-4" />
+              <span className="text-[11px] font-black tracking-wider">SCAN</span>
             </button>
 
             <button
               onClick={() => setIsAboutDialogOpen(true)}
               title="MDR Rules & Guide"
-              className="flex items-center justify-center p-2 text-txt-secondary hover:text-txt-primary transition-colors"
+              className="flex h-8 w-8 items-center justify-center border border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary transition-colors"
             >
-              <Info className="h-5 w-5" />
+              <Info className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Header (Clean 3-Line Layout) */}
-        <div className="flex flex-col border-t border-border-subtle bg-bg-surface md:hidden">
+        {/* Mobile Navigation Header (3 Clean Lines Layout - No Grid, No Sliding Drawer) */}
+        <div className="flex flex-col gap-2 p-2 border-t border-border-subtle bg-bg-surface md:hidden">
           {/* Line 2: Primary Payment Workstations */}
-          <div className="grid grid-cols-3 border-b border-border-subtle/50">
+          <div className="flex items-center justify-between gap-1.5">
             {navItems.slice(0, 3).map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -115,21 +115,21 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-col items-center justify-center gap-1 min-h-[44px] py-2 text-[10px] font-black uppercase tracking-wider border-r border-border-subtle/50 last:border-r-0 transition-all active:bg-brand-primary/10 ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-black uppercase tracking-wider border-[1.5px] min-h-[44px] transition-all ${
                     isActive
-                      ? 'bg-brand-primary/15 text-brand-primary font-black'
-                      : 'text-txt-secondary hover:text-txt-primary'
+                      ? 'border-brand-primary bg-brand-primary/15 text-brand-primary shadow-neo-sm font-black'
+                      : 'border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
           </div>
 
           {/* Line 3: Utility Tools & History Ledger */}
-          <div className="grid grid-cols-3">
+          <div className="flex items-center justify-between gap-1.5">
             {navItems.slice(3, 6).map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -138,14 +138,14 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-col items-center justify-center gap-1 min-h-[44px] py-2 text-[10px] font-black uppercase tracking-wider border-r border-border-subtle/50 last:border-r-0 transition-all active:bg-brand-primary/10 ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-black uppercase tracking-wider border-[1.5px] min-h-[44px] transition-all ${
                     isActive
-                      ? 'bg-brand-primary/15 text-brand-primary font-black'
-                      : 'text-txt-secondary hover:text-txt-primary'
+                      ? 'border-brand-primary bg-brand-primary/15 text-brand-primary shadow-neo-sm font-black'
+                      : 'border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
