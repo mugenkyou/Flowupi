@@ -21,6 +21,7 @@ interface TrancheCardProps {
   tranche: Tranche;
   totalTranches: number;
   merchantName: string;
+  merchantVpa?: string;
   onStatusChange?: (trancheId: string, status: 'paid' | 'pending' | 'failed') => void;
   compact?: boolean;
   isCurrentActive?: boolean;
@@ -31,6 +32,7 @@ export function TrancheCard({
   tranche,
   totalTranches,
   merchantName,
+  merchantVpa,
   onStatusChange,
   compact = false,
   isCurrentActive = false,
@@ -38,30 +40,53 @@ export function TrancheCard({
 }: TrancheCardProps) {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [upiLaunched, setUpiLaunched] = useState(false);
 
+  // Extract VPA from tranche upiUri if not passed explicitly
+  const getVpa = (): string => {
+    if (merchantVpa && merchantVpa.trim()) return merchantVpa.trim();
+    const match = tranche.upiUri.match(/[?&]pa=([^&]+)/i);
+    return match ? decodeURIComponent(match[1]) : 'merchant@upi';
+  };
+
+  const getCleanPaymentUrl = (): string => {
+    // Lazy import or build payment URL
+    const vpa = getVpa();
+    const compactObj = {
+      v: vpa,
+      m: merchantName || 'Merchant',
+      a: Number(tranche.amount.toFixed(2)),
+      p: tranche.payerName || '',
+      n: 'Group Bill Split',
+    };
+    const jsonString = JSON.stringify(compactObj);
+    const base64 = btoa(encodeURIComponent(jsonString))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://flowupi.vercel.app';
+    return `${origin}/p/${base64}`;
+  };
+
   const handleCopyUri = () => {
-    navigator.clipboard.writeText(tranche.upiUri);
+    const cleanUrl = getCleanPaymentUrl();
+    navigator.clipboard.writeText(cleanUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSoundboxAlert = async () => {
-    setIsPlayingAudio(true);
-    await playSoundboxConfirmation(tranche.amount, merchantName, 1.0);
-    setIsPlayingAudio(false);
-  };
-
   const handleShare = async () => {
+    const cleanUrl = getCleanPaymentUrl();
     const payerStr = tranche.payerName ? ` (${tranche.payerName})` : '';
-    const text = `Pay ₹${tranche.amount.toFixed(2)}${payerStr} for ${merchantName} via UPI:\n${tranche.upiUri}`;
+    const text = `Your FlowUPI payment link for the group bill${payerStr}:\n${cleanUrl}`;
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `FlowUPI Tranche #${tranche.index} for ${merchantName}`,
+          title: `FlowUPI Payment Link for ${merchantName}`,
           text,
+          url: cleanUrl,
         });
         setShared(true);
         setTimeout(() => setShared(false), 2000);
@@ -84,15 +109,16 @@ export function TrancheCard({
   };
 
   const handleWhatsAppShare = () => {
+    const cleanUrl = getCleanPaymentUrl();
     const payerStr = tranche.payerName ? ` (${tranche.payerName})` : '';
-    const text = `Pay ₹${tranche.amount.toFixed(2)}${payerStr} for ${merchantName} via UPI:\n${tranche.upiUri}`;
+    const text = `Your FlowUPI payment link for the group bill${payerStr}:\n${cleanUrl}`;
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleOpenUpiApp = () => {
     setUpiLaunched(true);
-    // Deep link directly to UPI app without automatically setting status to paid
+    // Deep link directly to UPI app without exposing URI to shared links
     window.location.href = tranche.upiUri;
   };
 
@@ -239,24 +265,23 @@ export function TrancheCard({
             </div>
           )}
 
-          {/* Secondary Actions: Copy, Soundbox, Share & WhatsApp */}
+          {/* Secondary Actions: PAY button, Copy Link, WhatsApp & Share */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={handleSoundboxAlert}
-                disabled={isPlayingAudio}
-                title="Simulate Soundbox Audio Alert"
-                className="flex min-h-[38px] px-3 items-center gap-1.5 border border-border-subtle bg-bg-elevated text-xs font-bold text-brand-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
+                onClick={handleOpenUpiApp}
+                title="Pay via UPI App"
+                className="flex min-h-[38px] px-4 items-center gap-1.5 border border-brand-primary bg-brand-primary text-bg text-xs font-black uppercase tracking-wider shadow-neo-sm hover:bg-brand-primary/90 transition-all active:translate-x-0.5 active:translate-y-0.5"
               >
-                <Volume2 className={`h-3.5 w-3.5 ${isPlayingAudio ? 'animate-bounce' : ''}`} />
-                <span className="hidden sm:inline">Audio Alert</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>PAY</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleCopyUri}
-                title="Copy UPI Intent URI"
+                title="Copy FlowUPI Payment Link"
                 className="flex min-h-[38px] px-3 items-center gap-1.5 border border-border-subtle bg-bg-elevated text-xs font-bold text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
               >
                 {copied ? (
@@ -287,7 +312,7 @@ export function TrancheCard({
               <button
                 type="button"
                 onClick={handleShare}
-                title="Share Tranche"
+                title="Share Payment Link"
                 className="flex min-h-[38px] px-3 items-center gap-1.5 border border-border-subtle bg-bg-elevated text-xs font-bold text-txt-secondary hover:text-txt-primary shadow-neo-sm hover:border-brand-primary transition-all active:translate-x-0.5 active:translate-y-0.5"
               >
                 {shared ? (

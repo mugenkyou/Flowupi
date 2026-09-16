@@ -13,13 +13,16 @@ import {
   Upload,
   Loader2,
   CheckCircle2,
+  Share2,
+  ExternalLink,
 } from 'lucide-react';
 import { createGroupSplitOrder } from '../../lib/splitEngine';
-import { SplitOrder } from '../../lib/types';
+import { SplitOrder, Tranche } from '../../lib/types';
 import { saveOrder, saveGroup } from '../../lib/storage';
 import { TrancheCard } from '../../components/TrancheCard';
 import { SplitCheckoutModal } from '../../components/SplitCheckoutModal';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
+import { generatePaymentUrl } from '../../lib/paymentLink';
 
 const QRScannerModal = dynamic(
   () => import('../../components/QRScannerModal').then((mod) => mod.QRScannerModal),
@@ -38,6 +41,7 @@ export default function GroupSplitPage() {
   const [isQrScannerOpen, setIsQrScannerOpen] = useState<boolean>(false);
   const [isDecodingQr, setIsDecodingQr] = useState<boolean>(false);
   const [autoFilledFromQr, setAutoFilledFromQr] = useState<boolean>(false);
+  const [copiedParticipantId, setCopiedParticipantId] = useState<string | null>(null);
   const groupFileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePeopleChange = (num: number) => {
@@ -131,6 +135,74 @@ export default function GroupSplitPage() {
   };
 
   const perPersonShare = (totalAmount / numberOfPeople).toFixed(2);
+
+  const getParticipantLink = (t: Tranche): string => {
+    return generatePaymentUrl({
+      vpa: merchantVpa,
+      name: merchantName,
+      amount: t.amount,
+      payer: t.payerName || `Friend #${t.index}`,
+      note: 'Group Bill Split',
+    }, true);
+  };
+
+  const handleShareParticipantLink = async (t: Tranche) => {
+    const link = getParticipantLink(t);
+    const payerName = t.payerName || `Friend #${t.index}`;
+    const shareText = `Your FlowUPI payment link for ${merchantName} (₹${t.amount.toFixed(2)}):\n${link}`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `FlowUPI Payment Link for ${payerName}`,
+          text: shareText,
+          url: link,
+        });
+        return;
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopiedParticipantId(t.id);
+      setTimeout(() => setCopiedParticipantId(null), 2000);
+    } catch (_) {
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleShareAllGroupLinks = async () => {
+    if (!groupOrder) return;
+    const linksList = groupOrder.tranches
+      .map((t) => {
+        const payer = t.payerName || `Friend #${t.index}`;
+        const link = getParticipantLink(t);
+        return `• ${payer} (₹${t.amount.toFixed(2)}): ${link}`;
+      })
+      .join('\n');
+
+    const text = `🍽️ Group Bill Split for ${merchantName}\nTotal: ₹${totalAmount.toFixed(0)} (${numberOfPeople} people • ₹${perPersonShare}/person)\n\nShare payment links:\n${linksList}\n\n#FlowUPI`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `FlowUPI Group Split for ${merchantName}`,
+          text,
+        });
+        return;
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return;
+      }
+    }
+
+    navigator.clipboard.writeText(text);
+    setCopiedGroupShare(true);
+    setTimeout(() => setCopiedGroupShare(false), 2000);
+  };
+
   const groupShareText = `🍽️ Group Bill Split via @FlowUPI!\nTotal: ₹${totalAmount.toFixed(0)} (${numberOfPeople} people • ₹${perPersonShare}/person)\nPay your share instantly with 0% MDR fee! 🚀\n#FlowUPI #GroupSplit`;
 
   const handleCopyGroupShare = () => {
@@ -372,29 +444,109 @@ export default function GroupSplitPage() {
         </div>
 
         {/* Tranche Display Grid */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="lg:col-span-7 space-y-6">
           <h2 className="text-xs font-black uppercase tracking-wider text-txt-secondary">
             Individual Friend QR Cards ({numberOfPeople} Shares)
           </h2>
 
           {groupOrder && groupOrder.tranches.length > 0 ? (
-            <div className="space-y-3">
-              {groupOrder.tranches.map((t) => (
-                <TrancheCard
-                  key={t.id}
-                  tranche={t}
-                  totalTranches={groupOrder.tranches.length}
-                  merchantName={merchantName}
-                  onStatusChange={(id, status) => {
-                    const updatedTranches = groupOrder.tranches.map((item) =>
-                      item.id === id ? { ...item, status } : item
+            <div className="space-y-6">
+              <div className="space-y-3">
+                {groupOrder.tranches.map((t) => (
+                  <TrancheCard
+                    key={t.id}
+                    tranche={t}
+                    totalTranches={groupOrder.tranches.length}
+                    merchantName={merchantName}
+                    merchantVpa={merchantVpa}
+                    onStatusChange={(id, status) => {
+                      const updatedTranches = groupOrder.tranches.map((item) =>
+                        item.id === id ? { ...item, status } : item
+                      );
+                      const updatedOrder = { ...groupOrder, tranches: updatedTranches };
+                      setGroupOrder(updatedOrder);
+                      saveOrder(updatedOrder);
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* GROUP SHARE SECTION */}
+              <div className="border-[1.5px] border-border-subtle bg-bg-surface p-5 sm:p-6 shadow-neo space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border-subtle pb-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <NeoPopBadge label="GROUP SHARE" variant="primary" />
+                      <span className="text-xs font-black text-txt-primary uppercase tracking-wider">
+                        {merchantName}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-txt-secondary mt-1">
+                      Share each person&apos;s payment link so they can pay their share directly on their phone.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleShareAllGroupLinks}
+                    className="min-h-[38px] px-3.5 border border-brand-primary bg-brand-primary hover:bg-brand-primary/90 text-bg text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5"
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    <span>SHARE ALL LINKS</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {groupOrder.tranches.map((t) => {
+                    const payer = t.payerName || `Friend #${t.index}`;
+                    return (
+                      <div
+                        key={`share_${t.id}`}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-border-subtle bg-bg-elevated p-3 sm:px-4 shadow-neo-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-txt-primary">
+                            {payer}
+                          </span>
+                          <span className="text-xs font-bold text-brand-primary">
+                            — ₹{t.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              window.location.href = t.upiUri;
+                            }}
+                            className="px-3.5 py-1.5 border border-brand-primary bg-brand-primary text-bg font-black text-xs uppercase tracking-wider shadow-neo-sm hover:bg-brand-primary/90 transition-all flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            <span>PAY</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleShareParticipantLink(t)}
+                            className="px-3.5 py-1.5 border border-border-subtle bg-bg-surface text-txt-primary font-black text-xs uppercase tracking-wider shadow-neo-sm hover:border-brand-primary transition-all flex items-center gap-1"
+                          >
+                            {copiedParticipantId === t.id ? (
+                              <>
+                                <Check className="h-3 w-3 text-status-success" />
+                                <span className="text-status-success">Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Share2 className="h-3 w-3" />
+                                <span>SHARE</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     );
-                    const updatedOrder = { ...groupOrder, tranches: updatedTranches };
-                    setGroupOrder(updatedOrder);
-                    saveOrder(updatedOrder);
-                  }}
-                />
-              ))}
+                  })}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-12 text-center border-[1.5px] border-border-subtle bg-bg-surface text-txt-muted shadow-neo">
