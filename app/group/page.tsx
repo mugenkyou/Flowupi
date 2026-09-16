@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { createGroupSplitOrder } from '../../lib/splitEngine';
 import { SplitOrder } from '../../lib/types';
-import { saveOrder } from '../../lib/storage';
+import { saveOrder, saveGroup } from '../../lib/storage';
 import { TrancheCard } from '../../components/TrancheCard';
 import { SplitCheckoutModal } from '../../components/SplitCheckoutModal';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
@@ -56,6 +56,17 @@ export default function GroupSplitPage() {
     });
 
     saveOrder(order);
+    saveGroup({
+      id: order.orderId,
+      groupName: `${merchantName} Split`,
+      totalAmount,
+      numberOfPeople,
+      friendNames,
+      merchantName,
+      merchantVpa,
+      createdAt: order.createdAt,
+      order,
+    });
     setGroupOrder(order);
   };
 

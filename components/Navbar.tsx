@@ -17,10 +17,14 @@ import {
   Menu,
   Home,
   ChevronRight,
+  Smartphone,
+  Download,
+  CheckCircle2,
 } from 'lucide-react';
 import { QRScannerModal } from './QRScannerModal';
 import { SplitOrder } from '../lib/types';
 import { NeoPopButton } from './NeoPopComponents';
+import { usePwaInstall } from '../hooks/usePwaInstall';
 
 interface NavbarProps {
   onOrderCreated?: (order: SplitOrder) => void;
@@ -29,6 +33,7 @@ interface NavbarProps {
 export function Navbar({ onOrderCreated }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isInstallable, isStandalone, triggerInstall } = usePwaInstall();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -74,6 +79,13 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
     }
   };
 
+  const handleInstallClick = async () => {
+    const success = await triggerInstall();
+    if (!success && !isInstallable) {
+      alert("To install SplitUPI on your device, open your browser menu (⋮ or Share) and select 'Add to Home Screen' or 'Install App'.");
+    }
+  };
+
   return (
     <>
       {/* Top Header Bar */}
@@ -116,6 +128,17 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
               <QrCode className="h-4 w-4" />
               <span className="text-[11px] font-black tracking-wider hidden xs:inline">SCAN</span>
             </button>
+
+            {!isStandalone && (
+              <button
+                onClick={handleInstallClick}
+                title="Install SplitUPI Web App"
+                className="hidden md:flex items-center gap-1.5 border border-border-subtle bg-bg-elevated px-2.5 py-1.5 text-xs font-black text-txt-secondary hover:text-brand-primary hover:border-brand-primary transition-all"
+              >
+                <Smartphone className="h-4 w-4 text-brand-primary" />
+                <span className="text-[10px] font-black tracking-wider uppercase">INSTALL</span>
+              </button>
+            )}
 
             <button
               onClick={() => setIsAboutDialogOpen(true)}
@@ -185,6 +208,30 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
                 );
               })}
             </nav>
+
+            {/* PWA Install Button in Drawer */}
+            {isStandalone ? (
+              <div className="px-5 py-3 border-t border-border-subtle bg-status-success/10 flex items-center justify-between text-xs font-black text-status-success">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" /> APP INSTALLED
+                </span>
+                <span className="text-[10px] font-bold text-txt-muted uppercase">STANDALONE</span>
+              </div>
+            ) : (
+              <button
+                onClick={async () => {
+                  setIsDrawerOpen(false);
+                  await handleInstallClick();
+                }}
+                className="w-full flex items-center justify-between min-h-[48px] px-5 py-3 text-xs font-black uppercase tracking-wider text-brand-primary border-t border-border-subtle bg-brand-primary/10 hover:bg-brand-primary/20 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  <Smartphone className="h-4 w-4 text-brand-primary" />
+                  <span>INSTALL WEB APP</span>
+                </div>
+                <Download className="h-4 w-4 text-brand-primary" />
+              </button>
+            )}
 
             {/* Drawer Footer */}
             <div className="border-t border-border-subtle p-4 bg-bg-elevated/50 text-center">

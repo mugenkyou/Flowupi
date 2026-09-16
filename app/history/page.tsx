@@ -9,9 +9,19 @@ import {
   ArrowRight,
   ShieldCheck,
   QrCode,
+  Download,
+  Upload,
+  AlertCircle,
+  FileJson,
 } from 'lucide-react';
 import { SplitOrder } from '../../lib/types';
-import { getSavedOrders, deleteOrder, clearHistory } from '../../lib/storage';
+import {
+  getSavedOrders,
+  deleteOrder,
+  clearHistory,
+  exportData,
+  importData,
+} from '../../lib/storage';
 import { calcMdrSavings, calcPaidAmount, calcProgress } from '../../lib/splitEngine';
 import { SplitCheckoutModal } from '../../components/SplitCheckoutModal';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
@@ -20,20 +30,59 @@ export default function HistoryPage() {
   const [orders, setOrders] = useState<SplitOrder[]>([]);
   const [filter, setFilter] = useState<'all' | 'paid' | 'pending'>('all');
   const [selectedOrder, setSelectedOrder] = useState<SplitOrder | null>(null);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const loadData = () => {
+    setOrders(getSavedOrders());
+  };
 
   useEffect(() => {
-    setOrders(getSavedOrders());
+    loadData();
+
+    const handleDataImported = () => {
+      loadData();
+    };
+
+    window.addEventListener('splitupi:data_imported', handleDataImported);
+    return () => window.removeEventListener('splitupi:data_imported', handleDataImported);
   }, []);
 
   const handleDelete = (orderId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     deleteOrder(orderId);
-    setOrders(getSavedOrders());
+    loadData();
   };
 
   const handleClearAll = () => {
     clearHistory();
     setOrders([]);
+    setFeedbackMsg({ type: 'success', text: 'Transaction history cleared.' });
+    setTimeout(() => setFeedbackMsg(null), 3000);
+  };
+
+  const handleBackupExport = () => {
+    exportData();
+    setFeedbackMsg({ type: 'success', text: 'Exported local SplitUPI backup file.' });
+    setTimeout(() => setFeedbackMsg(null), 3000);
+  };
+
+  const handleBackupImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const res = importData(text);
+      if (res.success) {
+        loadData();
+        setFeedbackMsg({ type: 'success', text: res.message });
+      } else {
+        setFeedbackMsg({ type: 'error', text: res.message });
+      }
+    } catch (_) {
+      setFeedbackMsg({ type: 'error', text: 'Failed to read backup file.' });
+    }
+    setTimeout(() => setFeedbackMsg(null), 4000);
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -56,24 +105,64 @@ export default function HistoryPage() {
             <NeoPopBadge label="LOCAL STORAGE LEDGER" variant="secondary" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
-            Transaction History
+            Transaction History & Local Data
           </h1>
           <p className="text-xs font-bold text-txt-secondary mt-1">
-            Review past SplitUPI micro-tranche orders, check payment settlement progress, and resume pending checkouts.
+            Review past SplitUPI micro-tranche orders, export/import JSON backups, and clear local ledger records.
           </p>
         </div>
 
-        {orders.length > 0 && (
-          <NeoPopButton
-            onClick={handleClearAll}
-            variant="error"
-            fullWidth={false}
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleBackupExport}
+            className="flex items-center gap-1.5 border border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-black text-txt-secondary hover:text-brand-primary hover:border-brand-primary transition-all shadow-neo-sm"
           >
-            <Trash2 className="h-4 w-4" />
-            <span>CLEAR HISTORY</span>
-          </NeoPopButton>
-        )}
+            <Download className="h-4 w-4 text-brand-primary" />
+            <span>EXPORT BACKUP</span>
+          </button>
+
+          <label className="cursor-pointer flex items-center gap-1.5 border border-border-subtle bg-bg-elevated px-3 py-2 text-xs font-black text-txt-secondary hover:text-brand-cyan hover:border-brand-cyan transition-all shadow-neo-sm">
+            <Upload className="h-4 w-4 text-brand-cyan" />
+            <span>IMPORT BACKUP</span>
+            <input
+              type="file"
+              accept=".json,application/json"
+              onChange={handleBackupImport}
+              className="hidden"
+            />
+          </label>
+
+          {orders.length > 0 && (
+            <NeoPopButton
+              onClick={handleClearAll}
+              variant="error"
+              fullWidth={false}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span>CLEAR HISTORY</span>
+            </NeoPopButton>
+          )}
+        </div>
       </div>
+
+      {/* Feedback Banner */}
+      {feedbackMsg && (
+        <div
+          className={`border-[1.5px] p-3 text-xs font-black flex items-center gap-2 shadow-neo-sm ${
+            feedbackMsg.type === 'success'
+              ? 'border-status-success bg-status-success/15 text-status-success'
+              : 'border-status-error bg-status-error/15 text-status-error'
+          }`}
+        >
+          {feedbackMsg.type === 'success' ? (
+            <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+          ) : (
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          )}
+          <span>{feedbackMsg.text}</span>
+        </div>
+      )}
 
       {/* Analytics Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -217,7 +306,7 @@ export default function HistoryPage() {
           order={selectedOrder}
           isOpen={!!selectedOrder}
           onClose={() => setSelectedOrder(null)}
-          onOrderUpdated={() => setOrders(getSavedOrders())}
+          onOrderUpdated={() => loadData()}
         />
       )}
     </div>
