@@ -1,15 +1,18 @@
 import { MetadataRoute } from 'next';
+import { BLOG_POSTS } from '../lib/blogData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app';
 
-  const routes = [
+  const staticRoutes = [
     '',
     '/scan',
     '/pos',
     '/group',
     '/calculator',
     '/soundbox',
+    '/history',
+    '/blog',
     '/about',
     '/help',
     '/contact',
@@ -20,10 +23,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/accessibility',
   ];
 
-  return routes.map((route) => ({
+  const blogRoutes = BLOG_POSTS.map((post) => `/blog/${post.slug}`);
+
+  const allRoutes = [...staticRoutes, ...blogRoutes];
+
+  return allRoutes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: route === '' ? 'daily' : 'monthly',
-    priority: route === '' ? 1.0 : 0.8,
+    changeFrequency: route === '' ? 'daily' : route.startsWith('/blog') ? 'weekly' : 'monthly',
+    priority: route === '' ? 1.0 : route === '/blog' ? 0.9 : 0.8,
   }));
 }

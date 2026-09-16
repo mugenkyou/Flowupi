@@ -75,6 +75,11 @@ export function Footer() {
               </h4>
               <ul className="space-y-1 font-bold">
                 <li>
+                  <Link href="/blog" className="inline-block py-1.5 hover:text-brand-primary transition-colors">
+                    Knowledge Base & Blog
+                  </Link>
+                </li>
+                <li>
                   <Link href="/help" className="inline-block py-1.5 hover:text-brand-primary transition-colors">
                     Help & FAQs
                   </Link>

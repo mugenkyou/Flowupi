@@ -20,6 +20,7 @@ import {
   Smartphone,
   Download,
   CheckCircle2,
+  BookOpen,
 } from 'lucide-react';
 import { QRScannerModal } from './QRScannerModal';
 import { SplitOrder } from '../lib/types';
@@ -46,6 +47,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
     { href: '/calculator', label: 'MDR CALCULATOR', icon: Calculator },
     { href: '/soundbox', label: 'SOUNDBOX', icon: Volume2 },
     { href: '/history', label: 'HISTORY', icon: History },
+    { href: '/blog', label: 'BLOG', icon: BookOpen },
   ];
 
   const desktopNavItems = [
@@ -53,7 +55,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
     { href: '/pos', label: 'POS Split', icon: Store },
     { href: '/group', label: 'Group Split', icon: Users },
     { href: '/calculator', label: 'MDR Roast', icon: Calculator },
-    { href: '/soundbox', label: 'Soundbox', icon: Volume2 },
+    { href: '/blog', label: 'Blog', icon: BookOpen },
     { href: '/history', label: 'History', icon: History },
   ];
 
