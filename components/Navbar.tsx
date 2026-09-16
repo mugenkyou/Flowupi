@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { SplitUpiLogo } from './SplitUpiLogo';
@@ -14,6 +14,9 @@ import {
   Info,
   Shield,
   X,
+  Menu,
+  Home,
+  ChevronRight,
 } from 'lucide-react';
 import { QRScannerModal } from './QRScannerModal';
 import { SplitOrder } from '../lib/types';
@@ -28,8 +31,19 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
   const router = useRouter();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const navItems = [
+    { href: '/', label: 'HOME', icon: Home },
+    { href: '/', label: 'SCAN / PAY', icon: QrCode },
+    { href: '/pos', label: 'POS SPLIT', icon: Store },
+    { href: '/group', label: 'GROUP SPLIT', icon: Users },
+    { href: '/calculator', label: 'MDR CALCULATOR', icon: Calculator },
+    { href: '/soundbox', label: 'SOUNDBOX', icon: Volume2 },
+    { href: '/history', label: 'HISTORY', icon: History },
+  ];
+
+  const desktopNavItems = [
     { href: '/', label: 'Scan / Pay', icon: QrCode },
     { href: '/pos', label: 'POS Split', icon: Store },
     { href: '/group', label: 'Group Split', icon: Users },
@@ -37,6 +51,16 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
     { href: '/soundbox', label: 'Soundbox', icon: Volume2 },
     { href: '/history', label: 'History', icon: History },
   ];
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isDrawerOpen) {
+        setIsDrawerOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDrawerOpen]);
 
   const handleGlobalOrderCreated = (order: SplitOrder) => {
     if (onOrderCreated) {
@@ -62,13 +86,13 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden items-center gap-1 md:flex">
-            {navItems.map((item) => {
+            {desktopNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
 
               return (
                 <Link
-                  key={item.href}
+                  key={item.label}
                   href={item.href}
                   className={`flex items-center gap-2 border-[1.5px] px-3 py-2 text-xs font-black uppercase tracking-wider transition-all ${
                     isActive
@@ -83,14 +107,14 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             })}
           </nav>
 
-          {/* Top Bar Actions */}
+          {/* Top Bar Actions & Mobile Hamburger */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsScannerOpen(true)}
               className="flex items-center gap-1.5 border-[1.5px] border-brand-primary bg-brand-primary/10 px-2.5 py-1.5 text-xs font-black text-brand-primary shadow-neo-sm hover:bg-brand-primary/20 active:translate-x-[1px] active:translate-y-[1px]"
             >
               <QrCode className="h-4 w-4" />
-              <span className="text-[11px] font-black tracking-wider">SCAN</span>
+              <span className="text-[11px] font-black tracking-wider hidden xs:inline">SCAN</span>
             </button>
 
             <button
@@ -100,58 +124,77 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             >
               <Info className="h-4 w-4" />
             </button>
-          </div>
-        </div>
 
-        {/* Mobile Navigation Header (3 Clean Lines Layout - No Grid, No Sliding Drawer) */}
-        <div className="flex flex-col gap-2 p-2 border-t border-border-subtle bg-bg-surface md:hidden">
-          {/* Line 2: Primary Payment Workstations */}
-          <div className="flex items-center justify-between gap-1.5">
-            {navItems.slice(0, 3).map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-black uppercase tracking-wider border-[1.5px] min-h-[44px] transition-all ${
-                    isActive
-                      ? 'border-brand-primary bg-brand-primary/15 text-brand-primary shadow-neo-sm font-black'
-                      : 'border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Line 3: Utility Tools & History Ledger */}
-          <div className="flex items-center justify-between gap-1.5">
-            {navItems.slice(3, 6).map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-1 text-[10px] font-black uppercase tracking-wider border-[1.5px] min-h-[44px] transition-all ${
-                    isActive
-                      ? 'border-brand-primary bg-brand-primary/15 text-brand-primary shadow-neo-sm font-black'
-                      : 'border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              );
-            })}
+            {/* Mobile Hamburger Menu Button */}
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              aria-label="Open Navigation Menu"
+              className="flex h-9 w-9 items-center justify-center border-[1.5px] border-border-subtle bg-bg-surface text-txt-primary shadow-neo-sm hover:border-brand-primary md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile Right-Side Navigation Drawer */}
+      {isDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end md:hidden">
+          {/* Dimmed Backdrop */}
+          <div
+            onClick={() => setIsDrawerOpen(false)}
+            className="fixed inset-0 bg-bg/80 backdrop-blur-sm transition-opacity"
+          />
+
+          {/* Slide-in Drawer Container */}
+          <div className="relative z-10 flex h-full w-72 max-w-[85vw] flex-col border-l-[1.5px] border-border-subtle bg-bg-surface shadow-2xl transition-transform">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between border-b border-border-subtle p-4 bg-bg-elevated">
+              <SplitUpiLogo size="sm" />
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="flex h-8 w-8 items-center justify-center border border-border-subtle text-txt-secondary hover:border-brand-primary hover:text-txt-primary"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Drawer Navigation Links */}
+            <nav className="flex-1 overflow-y-auto py-3 space-y-1">
+              {navItems.map((item, idx) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href && (item.label !== 'HOME' || idx === 0);
+
+                return (
+                  <Link
+                    key={`${item.label}-${idx}`}
+                    href={item.href}
+                    onClick={() => setIsDrawerOpen(false)}
+                    className={`flex items-center justify-between min-h-[48px] px-5 py-3 text-xs font-black uppercase tracking-wider transition-all border-l-4 ${
+                      isActive
+                        ? 'border-brand-primary bg-brand-primary/15 text-brand-primary shadow-neo-sm'
+                        : 'border-transparent text-txt-secondary hover:bg-bg-elevated hover:text-txt-primary'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={`h-4 w-4 ${isActive ? 'text-brand-primary' : 'text-txt-muted'}`} />
+                      <span>{item.label}</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-txt-muted opacity-60" />
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Drawer Footer */}
+            <div className="border-t border-border-subtle p-4 bg-bg-elevated/50 text-center">
+              <span className="text-[10px] font-black uppercase tracking-widest text-txt-muted">
+                SplitUPI • 0% MDR Payment Engine
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Global QR Scanner Modal */}
       {isScannerOpen && (
@@ -162,7 +205,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
         />
       )}
 
-      {/* About 0% MDR Arbitrage Dialog matching Flutter _showAboutMdrDialog */}
+      {/* About 0% MDR Arbitrage Dialog */}
       {isAboutDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg/85 backdrop-blur-md">
           <div className="relative w-full max-w-md border-[1.5px] border-border-subtle bg-bg-surface p-6 shadow-neo space-y-4">
