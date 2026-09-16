@@ -271,7 +271,7 @@ export default function GroupSplitPage() {
               <Users className="h-10 w-10 text-txt-muted/50 mb-2" />
               <p className="text-sm font-black text-txt-primary">No group split generated yet.</p>
               <p className="text-xs font-bold text-txt-muted mt-1 max-w-xs">
-                Click "GENERATE GROUP QR CARDS" to create individual UPI slice QR codes for each friend.
+                Click &quot;GENERATE GROUP QR CARDS&quot; to create individual UPI slice QR codes for each friend.
               </p>
             </div>
           )}

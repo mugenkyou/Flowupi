@@ -21,8 +21,8 @@ const config: Config = {
         },
         txt: {
           primary: "#F4F7FB",
-          secondary: "#9AA7BA",
-          muted: "#667085",
+          secondary: "#A0AEC0",
+          muted: "#8E9BB0",
         },
         border: {
           subtle: "#202B3D",
@@ -39,7 +39,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "'Space Grotesk'",
+          "var(--font-space-grotesk)",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",

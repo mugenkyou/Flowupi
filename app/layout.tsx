@@ -1,10 +1,18 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
+import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { getWebSiteSchema, getSoftwareApplicationSchema } from '../lib/jsonld';
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-space-grotesk',
+});
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app';
 
@@ -54,8 +62,6 @@ export const viewport: Viewport = {
   themeColor: '#05080E',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -67,7 +73,7 @@ export default function RootLayout({
   const appSchema = getSoftwareApplicationSchema();
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${spaceGrotesk.variable}`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
@@ -84,9 +90,9 @@ export default function RootLayout({
       <body className="bg-bg text-txt-primary antialiased min-h-screen flex flex-col selection:bg-brand-cyan/30 selection:text-brand-cyan">
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-4BFKD44HFM"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -105,3 +111,4 @@ export default function RootLayout({
     </html>
   );
 }
+

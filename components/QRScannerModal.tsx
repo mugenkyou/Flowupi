@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
 import { parseUpiUri, createTrancheOrder } from '../lib/splitEngine';
 import { SplitOrder } from '../lib/types';
 import {
@@ -39,7 +38,7 @@ export function QRScannerModal({
   const [pastedUri, setPastedUri] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerRef = useRef<any>(null);
   const isProcessingRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -59,6 +58,7 @@ export function QRScannerModal({
   const startCamera = async () => {
     try {
       setErrorMsg('');
+      const { Html5Qrcode } = await import('html5-qrcode');
       const html5QrCode = new Html5Qrcode('qr-reader');
       scannerRef.current = html5QrCode;
 
@@ -136,6 +136,7 @@ export function QRScannerModal({
 
     try {
       setErrorMsg('');
+      const { Html5Qrcode } = await import('html5-qrcode');
       const html5QrCode = new Html5Qrcode('qr-reader-file');
       const result = await html5QrCode.scanFile(file, true);
       handleScannedResult(result);
@@ -173,7 +174,8 @@ export function QRScannerModal({
               stopCamera();
               onClose();
             }}
-            className="rounded-xl border border-border-subtle p-2 text-txt-secondary hover:bg-bg-elevated hover:text-txt-primary transition-all"
+            aria-label="Close scanner modal"
+            className="rounded-xl border border-border-subtle p-2 text-txt-secondary hover:bg-bg-elevated hover:text-txt-primary transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             <X className="h-5 w-5" />
           </button>

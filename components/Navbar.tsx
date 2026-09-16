@@ -124,7 +124,8 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsScannerOpen(true)}
-              className="flex items-center gap-1.5 border-[1.5px] border-brand-primary bg-brand-primary/10 px-2.5 py-1.5 text-xs font-black text-brand-primary shadow-neo-sm hover:bg-brand-primary/20 active:translate-x-[1px] active:translate-y-[1px]"
+              aria-label="Scan QR code"
+              className="flex items-center gap-1.5 border-[1.5px] border-brand-primary bg-brand-primary/10 px-2.5 py-1.5 text-xs font-black text-brand-primary shadow-neo-sm hover:bg-brand-primary/20 active:translate-x-[1px] active:translate-y-[1px] min-h-[44px] min-w-[44px]"
             >
               <QrCode className="h-4 w-4" />
               <span className="text-[11px] font-black tracking-wider hidden xs:inline">SCAN</span>
@@ -134,7 +135,8 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
               <button
                 onClick={handleInstallClick}
                 title="Install FlowUPI Web App"
-                className="hidden md:flex items-center gap-1.5 border border-border-subtle bg-bg-elevated px-2.5 py-1.5 text-xs font-black text-txt-secondary hover:text-brand-primary hover:border-brand-primary transition-all"
+                aria-label="Install FlowUPI Web App"
+                className="hidden md:flex items-center gap-1.5 border border-border-subtle bg-bg-elevated px-2.5 py-1.5 text-xs font-black text-txt-secondary hover:text-brand-primary hover:border-brand-primary transition-all min-h-[44px]"
               >
                 <Smartphone className="h-4 w-4 text-brand-primary" />
                 <span className="text-[10px] font-black tracking-wider uppercase">INSTALL</span>
@@ -144,7 +146,8 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             <button
               onClick={() => setIsAboutDialogOpen(true)}
               title="MDR Rules & Guide"
-              className="flex h-8 w-8 items-center justify-center border border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary transition-colors"
+              aria-label="MDR Rules & Guide"
+              className="flex h-9 w-9 items-center justify-center border border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary transition-colors min-h-[44px] min-w-[44px]"
             >
               <Info className="h-4 w-4" />
             </button>
@@ -153,7 +156,7 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             <button
               onClick={() => setIsDrawerOpen(true)}
               aria-label="Open Navigation Menu"
-              className="flex h-9 w-9 items-center justify-center border-[1.5px] border-border-subtle bg-bg-surface text-txt-primary shadow-neo-sm hover:border-brand-primary md:hidden"
+              className="flex h-9 w-9 items-center justify-center border-[1.5px] border-border-subtle bg-bg-surface text-txt-primary shadow-neo-sm hover:border-brand-primary md:hidden min-h-[44px] min-w-[44px]"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -177,7 +180,8 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
               <FlowUpiLogo size="sm" />
               <button
                 onClick={() => setIsDrawerOpen(false)}
-                className="flex h-8 w-8 items-center justify-center border border-border-subtle text-txt-secondary hover:border-brand-primary hover:text-txt-primary"
+                aria-label="Close navigation menu"
+                className="flex h-9 w-9 items-center justify-center border border-border-subtle text-txt-secondary hover:border-brand-primary hover:text-txt-primary min-h-[44px] min-w-[44px]"
               >
                 <X className="h-5 w-5" />
               </button>

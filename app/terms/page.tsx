@@ -79,7 +79,7 @@ export default function TermsPage() {
         {/* Section 4 */}
         <section className="space-y-2 border-t border-border-subtle pt-6">
           <h2 className="text-sm font-black text-txt-primary uppercase tracking-wider">
-            4. Local Confirmation & "Mark as Paid"
+            4. Local Confirmation &amp; &quot;Mark as Paid&quot;
           </h2>
           <p>
             The &quot;Mark as Paid&quot; control within FlowUPI is a user-controlled local state marker designed for tracking payment progress. Pressing &quot;Mark as Paid&quot; does NOT independently query NPCI or verify with your bank that money was successfully transferred. Users are responsible for verifying payment settlement inside their banking app.

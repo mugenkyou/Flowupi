@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
 import { SplitOrder } from '../lib/types';
 import {
   calcPaidAmount,
@@ -59,7 +58,7 @@ export function SplitCheckoutModal({
   // Determine the first pending index (all indices beyond this are LOCKED)
   const firstPendingIndex = order.tranches.findIndex((t) => t.status !== 'paid');
 
-  const handleTrancheStatusChange = (
+  const handleTrancheStatusChange = async (
     trancheId: string,
     status: 'paid' | 'pending' | 'failed'
   ) => {
@@ -91,6 +90,7 @@ export function SplitCheckoutModal({
 
       const allPaid = updatedTranches.every((t) => t.status === 'paid');
       if (allPaid) {
+        const confetti = (await import('canvas-confetti')).default;
         confetti({
           particleCount: 100,
           spread: 70,
@@ -106,7 +106,7 @@ export function SplitCheckoutModal({
     }
   };
 
-  const handleMarkAllPaid = () => {
+  const handleMarkAllPaid = async () => {
     const updatedTranches = order.tranches.map((t) => ({
       ...t,
       status: 'paid' as const,
@@ -119,6 +119,7 @@ export function SplitCheckoutModal({
     if (onOrderUpdated) onOrderUpdated(updatedOrder);
 
     playSoundboxConfirmation(order.totalAmount, order.merchantName);
+    const confetti = (await import('canvas-confetti')).default;
     confetti({
       particleCount: 120,
       spread: 80,
@@ -150,7 +151,8 @@ export function SplitCheckoutModal({
 
           <button
             onClick={onClose}
-            className="border border-border-subtle p-2 text-txt-secondary hover:text-txt-primary hover:border-brand-primary transition-colors"
+            aria-label="Close checkout modal"
+            className="border border-border-subtle p-2 text-txt-secondary hover:text-txt-primary hover:border-brand-primary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             <X className="h-5 w-5" />
           </button>

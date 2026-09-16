@@ -2,10 +2,11 @@
 
 > FlowUPI is a fast, local-first web application designed for seamless UPI payments, merchant QR scanning, sub-₹2,000 bill micro-tranching, group bill splits, MDR savings calculations, and merchant soundbox audio confirmations.
 
-- Official Canonical URL: https://flowupi.vercel.app
-- Codebase Repository: https://github.com/mugenkyou/splitupi
+- [Official Canonical Website](https://flowupi.vercel.app): Primary production deployment URL.
+- [Codebase Repository](https://github.com/mugenkyou/splitupi): Open source codebase repository.
 
 ## Core Functionality & Features
+
 - QR Code Scanner: Scan merchant UPI QR codes (via camera or uploaded image file) or paste raw `upi://pay` intent strings.
 - Sub-₹2,000 Micro-Tranche Slicing: Slices large invoice totals into sequential micro-tranches of up to ₹1,999 to simulate NPCI 0% MDR interchange guidelines.
 - Manual Payment Tranche Confirmation: Users tap "Pay via UPI App" to invoke native UPI intent handlers (GPay, PhonePe, Paytm, BHIM) and manually mark tranches as paid after settlement verification.
@@ -16,20 +17,20 @@
 - Local-First History (`/history`): Entirely client-side transaction history stored in browser `localStorage` with JSON backup export and import tools.
 
 ## Key Public Routes
-- Web Application Home: https://flowupi.vercel.app/
-- QR Scanner: https://flowupi.vercel.app/scan
-- POS Register: https://flowupi.vercel.app/pos
-- Group Bill Splitter: https://flowupi.vercel.app/group
-- MDR Calculator: https://flowupi.vercel.app/calculator
-- Soundbox Alert Simulator: https://flowupi.vercel.app/soundbox
-- Documentation & Help FAQ: https://flowupi.vercel.app/help
-- About Product: https://flowupi.vercel.app/about
-- Maintainer Contact: https://flowupi.vercel.app/contact
-- Privacy Policy: https://flowupi.vercel.app/privacy
-- Terms of Use: https://flowupi.vercel.app/terms
-- Security Model: https://flowupi.vercel.app/security
-- Disclaimer: https://flowupi.vercel.app/disclaimer
-- Accessibility Statement: https://flowupi.vercel.app/accessibility
+
+- [Web Application Home](https://flowupi.vercel.app/): Main interactive workstation for scanning QR codes and processing payments.
+- [POS Register Terminal](https://flowupi.vercel.app/pos): Merchant counter workstation for bill tranching.
+- [Group Bill Splitter](https://flowupi.vercel.app/group): Social bill splitting among group members.
+- [MDR Calculator](https://flowupi.vercel.app/calculator): Educational calculator for UPI interchange fees.
+- [Soundbox Alert Simulator](https://flowupi.vercel.app/soundbox): Audio confirmation speaker simulator.
+- [Documentation & Help FAQ](https://flowupi.vercel.app/help): Complete user guide and FAQ.
+- [About Product](https://flowupi.vercel.app/about): Background on NPCI MDR regulations and FlowUPI engine.
+- [Maintainer Contact](https://flowupi.vercel.app/contact): Official support and feedback channels.
+- [Privacy Policy](https://flowupi.vercel.app/privacy): Information regarding local data storage privacy.
+- [Terms of Use](https://flowupi.vercel.app/terms): Terms governing usage of the application.
+- [Security Model](https://flowupi.vercel.app/security): Security architecture details.
+- [Financial Disclaimer](https://flowupi.vercel.app/disclaimer): Legal and financial disclaimers.
+- [Accessibility Statement](https://flowupi.vercel.app/accessibility): Accessibility compliance statement.
 
 ## Payment Workflow
 
@@ -55,7 +56,8 @@
 
 ## Authoritative Resources
 
-- Website: https://flowupi.vercel.app
-- Help & FAQs: https://flowupi.vercel.app/help
-- Privacy Policy: https://flowupi.vercel.app/privacy
-- Security Policy: https://flowupi.vercel.app/security
+- [Website](https://flowupi.vercel.app): Production home URL.
+- [Help & FAQs](https://flowupi.vercel.app/help): Frequently asked questions and guide.
+- [Privacy Policy](https://flowupi.vercel.app/privacy): Privacy policy.
+- [Security Policy](https://flowupi.vercel.app/security): Security architecture.
+

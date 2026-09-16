@@ -19,7 +19,7 @@ export default function SoundboxPage() {
           Soundbox Audio Synthesizer
         </h1>
         <p className="text-xs font-bold text-txt-secondary mt-1">
-          Simulate counter hardware audio confirmations (*"Payment of ₹X received on FlowUPI"*) using Web Audio API and Speech Synthesis.
+          Simulate counter hardware audio confirmations (&quot;Payment of ₹X received on FlowUPI&quot;) using Web Audio API and Speech Synthesis.
         </p>
       </div>
 
