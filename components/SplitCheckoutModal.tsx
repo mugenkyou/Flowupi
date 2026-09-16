@@ -126,8 +126,8 @@ export function SplitCheckoutModal({
   const currentTranche = order.tranches[activeTrancheIndex] || order.tranches[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-bg/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-2xl border-[1.5px] border-border-subtle bg-bg-surface shadow-neo">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-bg/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto border-[1.5px] border-border-subtle bg-bg-surface shadow-neo">
         {/* Top Header Bar */}
         <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4 bg-bg-elevated">
           <div className="flex items-center gap-2">

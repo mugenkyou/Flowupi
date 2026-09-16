@@ -124,8 +124,8 @@ export function QRScannerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg/85 backdrop-blur-md">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border-subtle bg-bg-surface shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-bg/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border border-border-subtle bg-bg-surface shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4 bg-bg-elevated/50">
           <div className="flex items-center gap-2">
