@@ -33,8 +33,8 @@ export default function GroupSplitPage() {
   const [totalAmount, setTotalAmount] = useState<number>(5400);
   const [numberOfPeople, setNumberOfPeople] = useState<number>(3);
   const [friendNames, setFriendNames] = useState<string[]>(['Alex', 'Priya', 'Rahul']);
-  const [merchantVpa, setMerchantVpa] = useState<string>('restaurant@upi');
-  const [merchantName, setMerchantName] = useState<string>('Bistro Grill');
+  const [merchantVpa, setMerchantVpa] = useState<string>('');
+  const [merchantName, setMerchantName] = useState<string>('');
   const [groupOrder, setGroupOrder] = useState<SplitOrder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [copiedGroupShare, setCopiedGroupShare] = useState<boolean>(false);
@@ -401,9 +401,24 @@ export default function GroupSplitPage() {
               </div>
             </div>
 
-            <NeoPopButton type="submit" variant="primary">
-              <Zap className="h-4 w-4" /> GENERATE GROUP SPLIT QR CARDS
-            </NeoPopButton>
+            <div className="space-y-3">
+              <NeoPopButton type="submit" variant="primary">
+                <Zap className="h-4 w-4" /> GENERATE GROUP SPLIT QR CARDS
+              </NeoPopButton>
+
+              <NeoPopButton
+                type="button"
+                onClick={() => {
+                  if (!groupOrder) {
+                    handleGenerateGroupSplit();
+                  }
+                  setIsModalOpen(true);
+                }}
+                variant="secondary"
+              >
+                <QrCode className="h-4 w-4" /> OPEN GROUP CHECKOUT
+              </NeoPopButton>
+            </div>
           </form>
 
           {/* WhatsApp Share Card */}
