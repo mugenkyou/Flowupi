@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   alternates: {
     canonical: SITE_URL,
+  },
+  verification: {
+    google: '5w8gnos2EMpvOaxww-8unXKrbq22ddUe_Wd82N-liqA',
   },
   appleWebApp: {
     capable: true,
@@ -78,6 +82,19 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-bg text-txt-primary antialiased min-h-screen flex flex-col selection:bg-brand-cyan/30 selection:text-brand-cyan">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-4BFKD44HFM"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-4BFKD44HFM');
+          `}
+        </Script>
         <Navbar />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6">
           {children}
