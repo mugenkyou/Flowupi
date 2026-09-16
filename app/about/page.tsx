@@ -5,7 +5,7 @@ import { FlowUpiLogo } from '../../components/FlowUpiLogo';
 import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
 import { QrCode, Store, Users, Calculator, Volume2, ShieldCheck, Zap, ArrowRight, Lock } from 'lucide-react';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app';
 
 export const metadata: Metadata = {
   title: 'FlowUPI — About FlowUPI & Local-First UPI Utilities',

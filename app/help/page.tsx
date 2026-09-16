@@ -5,7 +5,7 @@ import { NeoPopBadge, NeoPopButton } from '../../components/NeoPopComponents';
 import { HelpCircle, QrCode, Lock, Zap, Smartphone, ArrowRight, ShieldCheck } from 'lucide-react';
 import { getFaqSchema } from '../../lib/jsonld';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app';
 
 export const metadata: Metadata = {
   title: 'FlowUPI — Help & Frequently Asked Questions',

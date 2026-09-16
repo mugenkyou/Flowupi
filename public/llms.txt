@@ -2,15 +2,34 @@
 
 > FlowUPI is a fast, local-first web application designed for seamless UPI payments, merchant QR scanning, sub-₹2,000 bill micro-tranching, group bill splits, MDR savings calculations, and merchant soundbox audio confirmations.
 
-## Core Capabilities & Features
+- Official Canonical URL: https://flowupi.vercel.app
+- Codebase Repository: https://github.com/mugenkyou/splitupi
 
-- **Scan / Pay**: Instant camera QR code scanning, gallery screenshot decoding, raw UPI intent URI (`upi://pay`) parsing, and confirmed amount entry.
-- **POS Micro-Tranching**: Slices invoice amounts into sequential sub-₹2,000 tranches to demonstrate 0% MDR interchange compliance under NPCI guidelines.
-- **Group Bill Splitter**: Divide dining, travel, or group expenses into individual sub-₹2,000 UPI slice QR cards per participant.
-- **MDR Calculator**: Interactive calculator estimating annual interchange savings based on monthly turnover and average ticket size.
-- **Soundbox Synthesizer**: Web Audio API audio confirmation simulator ("Payment of ₹X received on FlowUPI").
-- **Local Payment History & Backups**: Client-side storage of past transactions with export/import backup JSON capabilities.
-- **Progressive Web App (PWA)**: Offline-capable service worker shell installable on Android, iOS, and Desktop.
+## Core Functionality & Features
+- QR Code Scanner: Scan merchant UPI QR codes (via camera or uploaded image file) or paste raw `upi://pay` intent strings.
+- Sub-₹2,000 Micro-Tranche Slicing: Slices large invoice totals into sequential micro-tranches of up to ₹1,999 to simulate NPCI 0% MDR interchange guidelines.
+- Manual Payment Tranche Confirmation: Users tap "Pay via UPI App" to invoke native UPI intent handlers (GPay, PhonePe, Paytm, BHIM) and manually mark tranches as paid after settlement verification.
+- POS Counter Terminal (`/pos`): Merchant mode for counter bill generation and customer tranche card display.
+- Group Splitter (`/group`): Equal and itemized bill splitting with friend names and generated slice payment links.
+- MDR Calculator (`/calculator`): Educational estimation tool calculating potential gateway MDR savings under 0.4% interchange rules.
+- Soundbox Synthesizer (`/soundbox`): Web Speech API audio confirmation alert simulator for counter verification.
+- Local-First History (`/history`): Entirely client-side transaction history stored in browser `localStorage` with JSON backup export and import tools.
+
+## Key Public Routes
+- Web Application Home: https://flowupi.vercel.app/
+- QR Scanner: https://flowupi.vercel.app/scan
+- POS Register: https://flowupi.vercel.app/pos
+- Group Bill Splitter: https://flowupi.vercel.app/group
+- MDR Calculator: https://flowupi.vercel.app/calculator
+- Soundbox Alert Simulator: https://flowupi.vercel.app/soundbox
+- Documentation & Help FAQ: https://flowupi.vercel.app/help
+- About Product: https://flowupi.vercel.app/about
+- Maintainer Contact: https://flowupi.vercel.app/contact
+- Privacy Policy: https://flowupi.vercel.app/privacy
+- Terms of Use: https://flowupi.vercel.app/terms
+- Security Model: https://flowupi.vercel.app/security
+- Disclaimer: https://flowupi.vercel.app/disclaimer
+- Accessibility Statement: https://flowupi.vercel.app/accessibility
 
 ## Payment Workflow
 
@@ -36,7 +55,7 @@
 
 ## Authoritative Resources
 
-- Website: https://flowupi.app
-- Help & FAQs: https://flowupi.app/help
-- Privacy Policy: https://flowupi.app/privacy
-- Security Policy: https://flowupi.app/security
+- Website: https://flowupi.vercel.app
+- Help & FAQs: https://flowupi.vercel.app/help
+- Privacy Policy: https://flowupi.vercel.app/privacy
+- Security Policy: https://flowupi.vercel.app/security

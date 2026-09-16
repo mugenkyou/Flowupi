@@ -3,7 +3,7 @@
  * Generates schema.org compliant JSON-LD objects matching actual visible content.
  */
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app';
 
 export function getWebSiteSchema() {
   return {

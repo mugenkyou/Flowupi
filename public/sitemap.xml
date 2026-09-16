@@ -1,72 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://flowupi.app/</loc>
+    <loc>https://flowupi.vercel.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/scan</loc>
+    <loc>https://flowupi.vercel.app/scan</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/pos</loc>
+    <loc>https://flowupi.vercel.app/pos</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/group</loc>
+    <loc>https://flowupi.vercel.app/group</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/calculator</loc>
+    <loc>https://flowupi.vercel.app/calculator</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/soundbox</loc>
+    <loc>https://flowupi.vercel.app/soundbox</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/about</loc>
+    <loc>https://flowupi.vercel.app/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/help</loc>
+    <loc>https://flowupi.vercel.app/help</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/contact</loc>
+    <loc>https://flowupi.vercel.app/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/privacy</loc>
+    <loc>https://flowupi.vercel.app/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/terms</loc>
+    <loc>https://flowupi.vercel.app/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/security</loc>
+    <loc>https://flowupi.vercel.app/security</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/disclaimer</loc>
+    <loc>https://flowupi.vercel.app/disclaimer</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://flowupi.app/accessibility</loc>
+    <loc>https://flowupi.vercel.app/accessibility</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

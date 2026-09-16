@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app';
 
 export const metadata: Metadata = {
   title: 'Scan UPI QR Code — Instant Camera & Image Scanner | FlowUPI',

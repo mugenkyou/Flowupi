@@ -4,4 +4,4 @@ Disallow: /api/
 Disallow: /history
 Disallow: /history/
 
-Sitemap: https://flowupi.app/sitemap.xml
+Sitemap: https://flowupi.vercel.app/sitemap.xml
