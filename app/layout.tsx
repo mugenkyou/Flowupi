@@ -5,7 +5,7 @@ import './globals.css';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { OfflineBanner } from '../components/OfflineBanner';
-import { getWebSiteSchema, getSoftwareApplicationSchema } from '../lib/jsonld';
+import { getWebSiteSchema, getSoftwareApplicationSchema, getOrganizationSchema } from '../lib/jsonld';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -19,7 +19,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://flowupi.vercel.app
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'FlowUPI — Fast Local-First UPI Payment Utility',
+    default: 'FlowUPI — Instant UPI QR Payment & Bill Splitting Utility',
     template: '%s | FlowUPI',
   },
   description: 'FlowUPI is a fast, local-first UPI payment utility for scanning QR codes, splitting payments into tranches, MDR calculations, and local history.',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     apple: '/icons/icon.svg',
   },
   openGraph: {
-    title: 'FlowUPI — Fast Local-First UPI Payment Utility',
+    title: 'FlowUPI — Instant UPI QR Payment & Bill Splitting Utility',
     description: 'Scan UPI QR codes, split payments into sequential tranches, pay through your UPI app, and manage local payment history.',
     url: SITE_URL,
     siteName: 'FlowUPI',
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'FlowUPI — Fast Local-First UPI Payment Utility',
+    title: 'FlowUPI — Instant UPI QR Payment & Bill Splitting Utility',
     description: 'Scan UPI QR codes, split payments into sequential tranches, pay through your UPI app, and manage local payment history.',
   },
   robots: {
@@ -69,6 +69,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const orgSchema = getOrganizationSchema();
   const websiteSchema = getWebSiteSchema();
   const appSchema = getSoftwareApplicationSchema();
 
@@ -78,6 +79,10 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}

@@ -12,7 +12,7 @@ export default function HomePage() {
           <NeoPopBadge label="0% MDR COMPLIANT" variant="success" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
-          Scan & Pay Merchant UPI QR
+          FlowUPI — Instant UPI QR Payment & Bill Splitting Utility
         </h1>
         <p className="text-xs font-bold text-txt-secondary mt-1 max-w-xl">
           FlowUPI • Fast, local-first UPI payment utility. Scan counter QR codes or import payment screenshots to initiate sub-₹2,000 micro-tranche surcharge-free checkout.

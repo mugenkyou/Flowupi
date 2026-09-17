@@ -22,8 +22,8 @@ export default function SavingsCalculatorPage() {
   const annualMdrLoss = annualTurnover * mdrRate;
 
   // FlowUPI 0% MDR tier
-  const annualSplitUpiCost = 0;
-  const annualSavings = annualMdrLoss - annualSplitUpiCost;
+  const annualFlowUpiCost = 0;
+  const annualSavings = annualMdrLoss - annualFlowUpiCost;
   const threeYearSavings = annualSavings * 3;
 
   return (

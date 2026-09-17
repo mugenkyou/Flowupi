@@ -37,6 +37,10 @@ export default function AboutPage() {
           <NeoPopBadge label="LOCAL-FIRST WEB UTILITY" variant="primary" />
         </div>
 
+        <h1 className="text-2xl sm:text-3xl font-black text-txt-primary tracking-tight">
+          About FlowUPI — Local-First UPI Payment Utilities
+        </h1>
+
         <p className="text-sm sm:text-base font-bold text-txt-secondary leading-relaxed pt-2">
           FlowUPI is a fast, tactile web application built around simple payment workflows: <span className="text-brand-cyan">Scan</span>, <span className="text-brand-cyan">Split</span>, <span className="text-brand-cyan">Pay</span>, and <span className="text-brand-cyan">Track</span>. Designed with a local-first architecture, it ensures zero sensitive data is stored on remote servers.
         </p>

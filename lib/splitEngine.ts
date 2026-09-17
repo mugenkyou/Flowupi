@@ -312,7 +312,7 @@ export function createGroupSplitOrder(params: {
 }
 
 /**
- * MDR calculations without SplitUPI (0.4% on full transaction if > 2000, capped at 300)
+ * MDR calculations without FlowUPI (0.4% on full transaction if > 2000, capped at 300)
  */
 export function calcMdrStandard(totalAmount: number): number {
   if (totalAmount <= 2000) return 0.0;

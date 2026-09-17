@@ -48,6 +48,17 @@ export function getFaqSchema(faqs: { question: string; answer: string }[]) {
   };
 }
 
+export function getOrganizationSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'FlowUPI',
+    url: SITE_URL,
+    logo: `${SITE_URL}/icons/icon.svg`,
+    description: 'FlowUPI is a fast, local-first web utility for UPI QR scanning, bill micro-tranching, MDR calculations, and group payments.',
+  };
+}
+
 export function getArticleSchema(article: {
   title: string;
   metaDescription: string;
@@ -72,7 +83,7 @@ export function getArticleSchema(article: {
       url: SITE_URL,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_URL}/icon-512.png`,
+        url: `${SITE_URL}/icons/icon.svg`,
       },
     },
   };

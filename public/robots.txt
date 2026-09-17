@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /history
-Disallow: /history/
-
-Sitemap: https://flowupi.vercel.app/sitemap.xml

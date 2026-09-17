@@ -11,7 +11,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/group',
     '/calculator',
     '/soundbox',
-    '/history',
     '/blog',
     '/about',
     '/help',
