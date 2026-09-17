@@ -111,11 +111,12 @@ export function HomeScannerWorkstation() {
     processDecodedResult(pastedUri);
   };
 
-  const handleProceedToSplit = (e?: React.FormEvent) => {
+  const handleProceedToSplit = (e?: React.FormEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
     if (!paymentContext) return;
 
-    const numAmount = parseFloat(amountInput);
+    const cleanedStr = amountInput.replace(/[^0-9.]/g, '');
+    const numAmount = parseFloat(cleanedStr);
     if (isNaN(numAmount) || numAmount <= 0) {
       setErrorMsg('ENTER A VALID AMOUNT: Please enter a payment amount greater than ₹0.');
       return;
@@ -132,7 +133,8 @@ export function HomeScannerWorkstation() {
     setActiveOrder(order);
   };
 
-  const parsedAmountNum = parseFloat(amountInput);
+  const cleanedAmountStr = amountInput.replace(/[^0-9.]/g, '');
+  const parsedAmountNum = parseFloat(cleanedAmountStr);
   const isAmountValid = !isNaN(parsedAmountNum) && isFinite(parsedAmountNum) && parsedAmountNum > 0;
 
   return (
@@ -220,7 +222,7 @@ export function HomeScannerWorkstation() {
                 <span className="absolute left-4 top-3.5 text-2xl font-black text-txt-muted">₹</span>
                 <input
                   id="payment-amount-input"
-                  type="number"
+                  type="text"
                   inputMode="decimal"
                   value={amountInput}
                   onChange={(e) => {
@@ -241,6 +243,7 @@ export function HomeScannerWorkstation() {
             {/* Submit Button */}
             <NeoPopButton
               type="submit"
+              onClick={(e) => handleProceedToSplit(e)}
               disabled={!isAmountValid}
               variant={isAmountValid ? 'primary' : 'surface'}
             >
