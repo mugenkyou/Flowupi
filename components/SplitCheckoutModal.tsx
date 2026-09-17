@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { SplitOrder } from '../lib/types';
 import {
   calcPaidAmount,
@@ -38,6 +39,7 @@ export function SplitCheckoutModal({
   onClose,
   onOrderUpdated,
 }: SplitCheckoutModalProps) {
+  const router = useRouter();
   const [order, setOrder] = useState<SplitOrder>(initialOrder);
   const [activeTrancheIndex, setActiveTrancheIndex] = useState<number>(0);
 
@@ -270,7 +272,13 @@ export function SplitCheckoutModal({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <NeoPopButton onClick={onClose} variant="success">
+                <NeoPopButton
+                  onClick={() => {
+                    onClose();
+                    router.push('/scan');
+                  }}
+                  variant="success"
+                >
                   <Check className="h-4 w-4" /> DONE
                 </NeoPopButton>
 
