@@ -36,8 +36,12 @@ export const metadata: Metadata = {
     title: 'FlowUPI',
   },
   icons: {
-    icon: '/icons/icon.svg',
-    apple: '/icons/icon.svg',
+    icon: [
+      { url: '/icons/favicon.ico' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/icons/apple-touch-icon.png',
   },
   openGraph: {
     title: 'FlowUPI — Instant UPI QR Payment & Bill Splitting Utility',
@@ -77,8 +81,10 @@ export default function RootLayout({
     <html lang="en" className={`dark ${spaceGrotesk.variable}`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
-        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        <link rel="icon" href="/icons/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
