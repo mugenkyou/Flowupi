@@ -75,6 +75,26 @@ export function Footer() {
               </h4>
               <ul className="space-y-1 font-bold">
                 <li>
+                  <a
+                    href="https://github.com/mugenkyou/Flowupi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block py-1.5 text-brand-cyan hover:underline transition-colors"
+                  >
+                    GitHub Repository
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/mugenkyou/Flowupi/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block py-1.5 hover:text-brand-primary transition-colors"
+                  >
+                    Report an Issue
+                  </a>
+                </li>
+                <li>
                   <Link href="/blog" className="inline-block py-1.5 hover:text-brand-primary transition-colors">
                     Knowledge Base & Blog
                   </Link>
@@ -136,9 +156,18 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-border-subtle/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-[11px] text-txt-muted">
           <div className="flex items-center gap-2">
-            <span>© 2026 FlowUPI • Local-First Web Application</span>
+            <span>© 2026 FlowUPI • Open Source Web Application</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="https://github.com/mugenkyou/Flowupi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block py-1 px-1.5 text-brand-cyan hover:underline"
+            >
+              GitHub
+            </a>
+            <span>•</span>
             <Link href="/privacy" className="inline-block py-1 px-1.5 hover:text-txt-primary">Privacy</Link>
             <span>•</span>
             <Link href="/terms" className="inline-block py-1 px-1.5 hover:text-txt-primary">Terms</Link>

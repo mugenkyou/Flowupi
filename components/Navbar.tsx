@@ -21,6 +21,7 @@ import {
   Download,
   CheckCircle2,
   BookOpen,
+  Github,
 } from 'lucide-react';
 import { QRScannerModal } from './QRScannerModal';
 import { SplitOrder } from '../lib/types';
@@ -145,6 +146,17 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
               </button>
             )}
 
+            <a
+              href="https://github.com/mugenkyou/Flowupi"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="View on GitHub"
+              aria-label="View FlowUPI on GitHub"
+              className="flex h-9 w-9 items-center justify-center border border-border-subtle bg-bg-elevated text-txt-secondary hover:text-txt-primary transition-colors min-h-[44px] min-w-[44px]"
+            >
+              <Github className="h-4 w-4 text-txt-primary" />
+            </a>
+
             <button
               onClick={() => setIsAboutDialogOpen(true)}
               title="MDR Rules & Guide"
@@ -241,10 +253,21 @@ export function Navbar({ onOrderCreated }: NavbarProps) {
             )}
 
             {/* Drawer Footer */}
-            <div className="border-t border-border-subtle p-4 bg-bg-elevated/50 text-center">
-              <span className="text-[10px] font-black uppercase tracking-widest text-txt-muted">
-                FlowUPI • 0% MDR Payment Engine
-              </span>
+            <div className="border-t border-border-subtle p-4 bg-bg-elevated/50 text-center space-y-2">
+              <a
+                href="https://github.com/mugenkyou/Flowupi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-black text-brand-cyan hover:underline uppercase tracking-wider"
+              >
+                <Github className="h-4 w-4" />
+                <span>VIEW ON GITHUB</span>
+              </a>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-txt-muted block">
+                  FlowUPI • Open Source Payment Utility
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -2,7 +2,15 @@
   "name": "flowupi-web",
   "version": "1.0.0",
   "description": "FlowUPI — Fast Local-First UPI Payment Utility",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mugenkyou/Flowupi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mugenkyou/Flowupi/issues"
+  },
+  "homepage": "https://github.com/mugenkyou/Flowupi#readme",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

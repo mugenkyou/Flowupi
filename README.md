@@ -1,112 +1,73 @@
-# ⚡ FlowUPI — Fast, Local-First UPI Payment Utility
+# FlowUPI
 
-[![Next.js 14](https://img.shields.io/badge/Next.js-14.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![PWA Ready](https://img.shields.io/badge/PWA-Installable-purple?style=for-the-badge&logo=pwa)](https://flowupi.vercel.app/)
+FlowUPI is a local-first web application for scanning UPI payment QR codes, splitting merchant invoices into sequential sub-₹2,000 micro-tranches, managing group bill splits, and simulating merchant soundbox audio alerts.
 
-**FlowUPI** is a fast, local-first web application designed for seamless UPI payments, merchant QR code scanning, bill micro-tranching, group bill splitting, MDR fee calculations, and merchant soundbox audio confirmations.
+## Live Demo
 
-Created by **Sachin**, FlowUPI operates as an installable **Progressive Web App (PWA)** with 100% local persistence. All calculations, QR decodes, and transaction records execute entirely client-side inside your browser—working offline without requiring a cloud backend or database.
+[https://flowupi.vercel.app/](https://flowupi.vercel.app/)
 
-🌐 **Live Web Application**: [https://flowupi.vercel.app/](https://flowupi.vercel.app/)
+## What it does
 
----
+FlowUPI helps users and merchants process UPI payment workflows client-side without requiring a cloud backend or account registration. It parses standard NPCI UPI QR codes, slices invoice totals into smaller payment tranches, generates UPI intent deep links for installed payment applications, and stores transaction history locally inside the browser.
 
-## ✨ Core Features & Utility Workstations
+## Features
 
-### 1. 📷 Instant QR Scan & Payment Workstation (`/scan`)
-- **Live Camera Scanning**: High-speed QR scanning via device camera powered by `html5-qrcode`.
-- **Multi-Strategy Screenshot Import**: Upload payment QR screenshots saved in your photo gallery. Uses a 4-tier failover decoder engine:
-  1. **Native `BarcodeDetector` API**: Hardware/OS accelerated vision decoding (Chrome, Edge, Safari 17+, Android WebViews).
-  2. **Direct `Html5Qrcode` Scan**: Pure JS scanning.
-  3. **Canvas Resizing**: Scales down high-res (1080p/4K) phone screenshots to 800px max dimension.
-  4. **Section Cropping**: Crops central QR placement regions targeting standard GPay, Paytm, and PhonePe screenshots.
-- **Intent URI Parsing**: Parses raw `upi://pay` URIs to extract payee address (`pa`), merchant name (`pn`), amount (`am`), and notes (`tn`).
+- **Merchant QR Scanner**: Scan physical QR standees via device camera or import screenshot images from gallery.
+- **UPI Intent Parser**: Extract payee VPA, payee name, amount, and reference notes from raw `upi://pay` strings.
+- **Bill Micro-Tranching**: Slice larger merchant invoices into sequential sub-₹2,000 payment tranches under NPCI 0% MDR guidelines.
+- **POS Counter Register Mode**: Fast bill tranching interface with retail preset items.
+- **Group Bill Splitter**: Divide bills equally or itemized among participants and generate individual payment links.
+- **MDR Calculator**: Interactive model comparing interchange fee economics across savings UPI, PPI wallets, and credit cards.
+- **Soundbox Audio Simulator**: Web Audio alert simulator for counter payment confirmations in 8 Indian languages.
+- **Local Payment History**: Manage payment records locally in `localStorage` with JSON export and import capabilities.
+- **PWA Support**: Progressive Web App manifest for installability on mobile devices.
 
-### 2. ⚡ 0% MDR Micro-Tranching Engine (`/pos`)
-- **Algorithmic Bill Partitioning**: Automatically divides large merchant invoices into structured sub-₹2,000 tranches to remain within 0% MDR fee tiers under NPCI guidelines.
-- **POS Counter Register Mode**: Fast bill calculator with pre-configured retail Kirana presets (`Atta & Oil`, `Full Ration`, `Dhaba Dinner`).
-- **Sequential Checkout**: Step-by-step progress checklist with instant deep-linking to installed UPI apps.
-
-### 3. 👥 Group Bill Splitter (`/group`)
-- **Equal & Itemized Division**: Divide dining, trip, or household bills between friends.
-- **QR Auto-Fill**: Scan a merchant QR code via camera or upload a QR screenshot to automatically populate Merchant Name, VPA, and total bill amount.
-- **Individual Slice Cards**: Generates individual UPI QR cards for each friend.
-- **1-Click WhatsApp Sharing**: Pre-formatted text cards and 1-click WhatsApp share buttons for sending individual payment links directly to group chats.
-
-### 4. 🧮 MDR Surcharge Roast & Calculator (`/calculator`)
-- **Turnover & Ticket Size Sliders**: Interactive financial model demonstrating business MDR fee recovery.
-- **Policy Comparison**: Simulates fee economics across standard savings bank UPI (0% MDR), PPI digital wallets (1.1%), and RuPay credit cards on UPI (0.4%–2.0%).
-
-### 5. 🔊 Soundbox Audio Synthesizer (`/soundbox`)
-- **Web Audio Alert Simulator**: Simulates merchant audio soundbox alerts (*"Payment of ₹X received on FlowUPI"*) in multiple Indian languages (Hindi, English, Tamil, Telugu, Kannada, Marathi, Bengali, Gujarati).
-
-### 6. 📚 SEO Knowledge Base & Blog (`/blog`)
-- **6 In-Depth Search-Focused Guides**:
-  1. *How to Pay Using a UPI QR Code: Complete Step-by-Step Guide*
-  2. *How to Split a Restaurant or Group Bill Using UPI*
-  3. *How to Split a Large UPI Payment Into Multiple Payments*
-  4. *UPI MDR Explained: Merchant Charges and Calculations*
-  5. *How to Split Bills With Friends Without Losing Track of Payments*
-  6. *Useful UPI Tools for Managing Everyday Payments*
-- **Structured Data**: Injects schema.org compliant `Article`, `FAQPage`, and `BreadcrumbList` JSON-LD tags into article markup.
-
-### 7. 💾 Local-First History Ledger (`/history`)
-- **100% Client-Side Privacy**: All transaction records and group split histories are stored in browser `localStorage`.
-- **JSON Backup Export & Import**: Download an unencrypted `flowupi-backup-YYYY-MM-DD.json` file anytime or restore data on new devices.
-
----
-
-## 🏗️ Architecture & Data Flow
+## How it works
 
 ```text
-                           ┌───────────────────────────┐
-                           │   FlowUPI PWA Frontend    │
-                           │   (Next.js 14 App Router) │
-                           └─────────────┬─────────────┘
-                                         │
-                 ┌───────────────────────┼───────────────────────┐
-                 ▼                       ▼                       ▼
-      ┌────────────────────┐   ┌────────────────────┐   ┌────────────────────┐
-      │ Client Engine      │   │ Privacy Storage    │   │ Knowledge Base     │
-      ├────────────────────┤   ├────────────────────┤   ├────────────────────┤
-      │ • Multi-Strategy   │   │ • localStorage     │   │ • 6 SEO Guides     │
-      │   QR Decoder       │   │ • JSON Backups     │   │ • JSON-LD Schemas  │
-      │ • Tranche Builder  │   │ • Zero Telemetry   │   │ • FAQ Accordions   │
-      │ • Soundbox Audio   │   │ • 100% Offline     │   │ • Internal Links   │
-      └────────────────────┘   └────────────────────┘   └────────────────────┘
+Merchant QR / Screenshot
+         ↓
+ Camera or Canvas Decoder
+         ↓
+ Parse `upi://pay` Parameters
+         ↓
+  Confirm Total Amount
+         ↓
+ Generate Sub-₹2,000 Tranches
+         ↓
+ Deep Link to UPI App (GPay, PhonePe, Paytm, BHIM)
+         ↓
+ Payment Verification
 ```
 
----
+## Privacy
 
-## 🛠️ Tech Stack
+- **Local Storage**: All transaction history, group splits, and user preferences are saved strictly in your browser's `localStorage`.
+- **Client-Side QR Decoding**: Camera feeds and uploaded image frames are processed in-memory in your browser using the `BarcodeDetector` API and canvas utilities. No images are uploaded to any server.
+- **No Credentials**: FlowUPI does not collect or store UPI PINs, passwords, OTPs, or card details.
+- **Analytics**: FlowUPI uses Google Analytics (`G-4BFKD44HFM`) to measure basic page usage and traffic metrics. Scanned QR content and financial figures are never sent to analytics.
 
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server Components, SSG static pre-rendering)
-- **Language**: [TypeScript 5](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 3](https://tailwindcss.com/) with NeoPOP 3D tactile borders and dark fintech color tokens
-- **QR Engine**: `html5-qrcode` & `qrcode.react`
-- **Native Vision**: Web `BarcodeDetector` API with Canvas fallback pipeline
-- **UI Components**: Custom NeoPOP buttons, cards, badges, and [Lucide React](https://lucide.dev/) icons
-- **Audio**: Web Audio API Soundbox synthesizer
-- **Animations**: `canvas-confetti` celebration triggers
+## Tech Stack
 
----
+- [Next.js 14](https://nextjs.org/) (App Router, Server Components)
+- [React 18](https://react.dev/) & [TypeScript 5](https://www.typescriptlang.org/)
+- [Tailwind CSS 3](https://tailwindcss.com/)
+- [Lucide React](https://lucide.dev/) (Icons)
+- `html5-qrcode` & `qrcode.react` (QR scanning & rendering)
 
-## 🏃 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v18.0.0 or higher
-- `npm` or `pnpm`
+- `npm`
 
 ### Installation
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/mugenkyou/splitupi.git
-   cd splitupi/web
+   git clone https://github.com/mugenkyou/Flowupi.git
+   cd Flowupi
    ```
 
 2. **Install dependencies**:
@@ -114,67 +75,63 @@ Created by **Sachin**, FlowUPI operates as an installable **Progressive Web App 
    npm install
    ```
 
-3. **Start development server**:
+3. **Start local development server**:
    ```bash
    npm run dev
    ```
    Open [http://localhost:3000](http://localhost:3000) in your web browser.
 
-### Production Build
-
-```bash
-# Compile TypeScript & generate production bundle
-npm run build
-
-# Launch production server
-npm run start
-```
-
----
-
-## 📁 Directory Structure
+## Project Structure
 
 ```text
-web/
-├── app/                      # Next.js 14 App Router routes
-│   ├── about/                # About 0% MDR Arbitrage guide
-│   ├── blog/                 # SEO Knowledge Base & [slug] reader
-│   ├── calculator/           # MDR Surcharge Roast Calculator
-│   ├── group/                # Group Bill Splitter with QR auto-fill
-│   ├── history/              # Local storage ledger & JSON backup
-│   ├── pos/                  # POS Micro-Tranche Workstation
-│   ├── scan/                 # Scan / Pay workstation
-│   ├── soundbox/             # Soundbox Audio Synthesizer
-│   ├── layout.tsx            # Root layout with Navbar & Footer
-│   ├── page.tsx              # Homepage workstation
-│   ├── robots.ts             # Dynamic robots.txt metadata
-│   └── sitemap.ts            # Dynamic sitemap.xml generator
-├── components/               # Reusable NeoPOP UI components
-│   ├── HomeScannerWorkstation.tsx
-│   ├── NeoPopComponents.tsx
-│   ├── QRScannerModal.tsx
-│   ├── TrancheCard.tsx
+Flowupi/
+├── app/                  # Next.js 14 App Router routes & pages
+│   ├── about/            # About page & open-source summary
+│   ├── blog/             # Knowledge base & guides
+│   ├── calculator/       # MDR calculator
+│   ├── group/            # Group bill splitter
+│   ├── history/          # Local ledger & JSON export/import
+│   ├── pos/              # POS counter register
+│   ├── scan/             # Scan & pay workstation
+│   ├── soundbox/         # Audio synthesizer
+│   ├── layout.tsx        # Root layout with header, footer, & analytics
+│   └── page.tsx          # Main home workstation
+├── components/           # Reusable UI components & modals
+│   ├── Navbar.tsx        # Header navigation & GitHub link
+│   ├── Footer.tsx        # Footer navigation & repository links
+│   ├── QRScannerModal.tsx # Camera & image file QR reader
 │   └── ...
-├── lib/                      # Core business logic & engines
-│   ├── blogData.ts           # 6 SEO blog articles repository
-│   ├── jsonld.ts             # Schema.org structured data helpers
-│   ├── qrDecoder.ts          # Multi-strategy image QR decoder
-│   ├── soundbox.ts           # Web Audio synthesizer engine
-│   ├── splitEngine.ts        # Micro-tranche & group split algorithms
-│   └── storage.ts            # LocalStorage persistence & migration
-└── public/                   # Static assets, manifests, and icons
+├── lib/                  # Business logic & utilities
+│   ├── qrDecoder.ts      # Multi-strategy QR decoding pipeline
+│   ├── splitEngine.ts    # Micro-tranche & UPI URI algorithms
+│   ├── storage.ts        # LocalStorage persistence & backup helpers
+│   └── types.ts          # TypeScript interfaces
+└── public/               # Static assets & web manifest
 ```
 
----
+## Development Scripts
 
-## ⚖️ Financial Disclaimer & Compliance
+In `package.json`:
 
-FlowUPI is designed strictly for educational research, academic demonstration, and payment utility simulation under National Payments Corporation of India (NPCI) guidelines. FlowUPI is not a bank, regulated financial institution, or payment processor. It does not store user financial credentials, UPI PINs, or process monetary transactions directly.
+- `npm run dev`: Starts local Next.js development server.
+- `npm run build`: Compiles TypeScript and creates optimized production build.
+- `npm run start`: Runs production Next.js server.
+- `npm run lint`: Runs Next.js ESLint code checks.
 
----
+## Contributing
 
-## 👤 Author & License
+FlowUPI is open source. Contributions, bug reports, and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-**Created and maintained by [Sachin](https://github.com/mugenkyou)**.
+## Security
 
-Licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+Please review [SECURITY.md](SECURITY.md) for vulnerability disclosure guidelines.
+
+## License
+
+FlowUPI is released under the [MIT License](LICENSE).
+
+## Links
+
+- **GitHub Repository**: [https://github.com/mugenkyou/Flowupi](https://github.com/mugenkyou/Flowupi)
+- **Issue Tracker**: [https://github.com/mugenkyou/Flowupi/issues](https://github.com/mugenkyou/Flowupi/issues)
+- **Live Demo**: [https://flowupi.vercel.app/](https://flowupi.vercel.app/)

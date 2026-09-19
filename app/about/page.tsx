@@ -127,6 +127,36 @@ export default function AboutPage() {
           </div>
         </div>
 
+        <div className="pt-4 border-t border-border-subtle space-y-3">
+          <h3 className="text-xs font-black uppercase text-txt-primary tracking-wider">
+            Open Source & Community
+          </h3>
+          <p className="text-xs text-txt-muted leading-relaxed">
+            FlowUPI is built as an open-source project released under the MIT License. You can inspect the source code, report bugs, or submit contributions directly on GitHub.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <a
+              href="https://github.com/mugenkyou/Flowupi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-black text-brand-cyan hover:underline uppercase"
+            >
+              <span>GitHub Repository</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+            <span className="text-txt-muted">•</span>
+            <a
+              href="https://github.com/mugenkyou/Flowupi/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-black text-txt-secondary hover:text-txt-primary uppercase"
+            >
+              <span>Issue Tracker</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </div>
+
         <div className="pt-4 border-t border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-xs font-bold text-txt-muted">
             Ready to explore FlowUPI tools?

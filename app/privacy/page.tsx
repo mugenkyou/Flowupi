@@ -124,7 +124,17 @@ export default function PrivacyPage() {
         {/* Section 7 */}
         <section className="space-y-2 border-t border-border-subtle pt-6">
           <h2 className="text-sm font-black text-txt-primary uppercase tracking-wider flex items-center gap-2">
-            <span>7. Changes to This Privacy Policy</span>
+            <span>7. Website Analytics & Usage Metrics</span>
+          </h2>
+          <p>
+            FlowUPI uses Google Analytics (<code className="bg-bg-elevated px-1.5 py-0.5 text-brand-cyan font-mono">G-4BFKD44HFM</code>) to measure aggregated page views and traffic metrics to help improve user experience. No payment data, scanned QR content, payee details, or financial figures are sent to analytics.
+          </p>
+        </section>
+
+        {/* Section 8 */}
+        <section className="space-y-2 border-t border-border-subtle pt-6">
+          <h2 className="text-sm font-black text-txt-primary uppercase tracking-wider flex items-center gap-2">
+            <span>8. Changes to This Privacy Policy</span>
           </h2>
           <p>
             Any future updates to this policy will be reflected on this page with an updated &quot;Last Updated&quot; date.

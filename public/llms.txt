@@ -3,7 +3,7 @@
 > FlowUPI is a fast, local-first web application designed for seamless UPI payments, merchant QR scanning, sub-₹2,000 bill micro-tranching, group bill splits, MDR savings calculations, and merchant soundbox audio confirmations.
 
 - [Official Canonical Website](https://flowupi.vercel.app): Primary production deployment URL.
-- [Codebase Repository](https://github.com/mugenkyou/splitupi): Open source codebase repository.
+- [Codebase Repository](https://github.com/mugenkyou/Flowupi): Open source codebase repository.
 
 ## Core Functionality & Features
 

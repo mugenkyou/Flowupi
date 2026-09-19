@@ -6,7 +6,7 @@ FlowUPI is committed to ensuring a secure, privacy-respecting client-side applic
 
 ## How to Report a Vulnerability
 
-1. Please submit your security findings via the official repository issue tracker or security reporting mechanism.
+1. Please submit your security findings via the official repository issue tracker at [https://github.com/mugenkyou/Flowupi/issues](https://github.com/mugenkyou/Flowupi/issues).
 2. Provide a detailed description of the vulnerability, including step-by-step reproduction instructions, affected routes/components, and potential impact.
 3. Allow reasonable time for project maintainers to investigate and address the report before sharing details publicly.
 
